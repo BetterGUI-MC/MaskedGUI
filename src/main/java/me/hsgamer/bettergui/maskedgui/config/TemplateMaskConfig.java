@@ -13,6 +13,9 @@ public class TemplateMaskConfig {
 
     public TemplateMaskConfig(MaskedGUI addon) {
         this.templateFolder = new File(addon.getDataFolder(), "template");
+        if (!templateFolder.exists() && templateFolder.mkdirs()) {
+            addon.getPlugin().getLogger().info("Created template mask folder");
+        }
     }
 
     public void setup() {

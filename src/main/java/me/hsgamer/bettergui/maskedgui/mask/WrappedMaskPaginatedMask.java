@@ -16,7 +16,7 @@ public class WrappedMaskPaginatedMask extends WrappedPaginatedMask<StaticMaskPag
 
     @Override
     protected StaticMaskPaginatedMask createPaginatedMask(Map<String, Object> section) {
-        List<WrappedMask> masks = Optional.ofNullable(section.get("mask"))
+        List<WrappedMask> masks = Optional.ofNullable(section.get("child"))
                 .flatMap(MapUtil::castOptionalStringObjectMap)
                 .map(o -> MaskBuilder.INSTANCE.getChildMasks(this, o))
                 .orElse(Collections.emptyList());

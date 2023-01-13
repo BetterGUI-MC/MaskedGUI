@@ -2,9 +2,6 @@ package me.hsgamer.bettergui.maskedgui.builder;
 
 import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.maskedgui.api.WrappedMask;
-import me.hsgamer.bettergui.maskedgui.mask.WrappedAnimatedMask;
-import me.hsgamer.bettergui.maskedgui.mask.WrappedMultiSlotMasks;
-import me.hsgamer.bettergui.maskedgui.mask.WrappedSingleMask;
 import me.hsgamer.hscore.builder.MassBuilder;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
 
@@ -16,14 +13,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMask> {
-    public static final MaskBuilder INSTANCE = new MaskBuilder();
-
-    private MaskBuilder() {
-        register(WrappedSingleMask::new, "single", "simple");
-        register(WrappedMultiSlotMasks::new, "multi-slots", "multislots", "multi-slot", "multislot", "multi");
-        register(WrappedAnimatedMask::new, "animated", "animate", "anim");
-    }
-
     public void register(Function<Input, WrappedMask> creator, String... type) {
         register(new Element<Input, WrappedMask>() {
             @Override

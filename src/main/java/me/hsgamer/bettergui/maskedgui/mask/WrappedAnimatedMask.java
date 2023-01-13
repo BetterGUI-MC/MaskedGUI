@@ -1,6 +1,6 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
-import me.hsgamer.bettergui.BetterGUI;
+import me.hsgamer.bettergui.maskedgui.MaskedGUI;
 import me.hsgamer.bettergui.maskedgui.api.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
@@ -13,8 +13,11 @@ import java.math.BigDecimal;
 import java.util.*;
 
 public class WrappedAnimatedMask extends BaseWrappedMask<AnimatedMask> {
-    public WrappedAnimatedMask(MaskBuilder.Input input) {
+    private final MaskedGUI addon;
+
+    public WrappedAnimatedMask(MaskedGUI addon, MaskBuilder.Input input) {
         super(input);
+        this.addon = addon;
     }
 
     @Override
@@ -33,10 +36,10 @@ public class WrappedAnimatedMask extends BaseWrappedMask<AnimatedMask> {
 
         List<WrappedMask> frames = Optional.ofNullable(keys.get("child"))
                 .flatMap(MapUtil::castOptionalStringObjectMap)
-                .map(o -> MaskBuilder.INSTANCE.getChildMasks(this, o))
+                .map(o -> addon.getMaskBuilder().getChildMasks(this, o))
                 .orElse(Collections.emptyList());
 
-        AnimatedMask animatedMask = new AnimatedMask(getName(), BetterGUI.getInstance(), update, async);
+        AnimatedMask animatedMask = new AnimatedMask(getName(), addon.getPlugin(), update, async);
         frames.forEach(animatedMask::addChildMasks);
         return animatedMask;
     }

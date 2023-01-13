@@ -4,9 +4,11 @@ import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.signal.ChangePageSignal;
+import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.bukkit.gui.mask.impl.PaginatedMask;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,7 +29,7 @@ public abstract class WrappedPaginatedMask<T extends PaginatedMask> extends Base
     protected T createMask(Map<String, Object> section) {
         T mask = createPaginatedMask(section);
         Optional.ofNullable(section.get("cycle")).map(Object::toString).map(Boolean::parseBoolean).ifPresent(mask::setCycle);
-        signalId = Optional.ofNullable(section.get("signal-id")).map(Object::toString).orElse(getName());
+        signalId = Objects.toString(MapUtil.getIfFoundOrDefault(section, getName(), "signal", "signal-id"));
         return mask;
     }
 

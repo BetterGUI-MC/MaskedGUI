@@ -22,7 +22,7 @@ public class WrappedMultiSlotMasks extends BaseWrappedMask<MultiSlotsMask> {
         List<Integer> slots = MultiSlotUtil.getSlots(section);
         MultiSlotsMask mask = new MultiSlotsMask(getName(), slots);
         MapUtil.castOptionalStringObjectMap(MapUtil.getIfFound(section, "button", "buttons"))
-                .ifPresent(map -> MaskUtil.createButtons(this, map).forEach(mask::addButtons));
+                .ifPresent(map -> MaskUtil.createButtons(this, map).values().forEach(mask::addButtons));
         return mask;
     }
 

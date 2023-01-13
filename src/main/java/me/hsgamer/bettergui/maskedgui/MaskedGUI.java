@@ -3,10 +3,7 @@ package me.hsgamer.bettergui.maskedgui;
 import me.hsgamer.bettergui.builder.MenuBuilder;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.config.TemplateMaskConfig;
-import me.hsgamer.bettergui.maskedgui.mask.TemplateMask;
-import me.hsgamer.bettergui.maskedgui.mask.WrappedAnimatedMask;
-import me.hsgamer.bettergui.maskedgui.mask.WrappedMultiSlotMasks;
-import me.hsgamer.bettergui.maskedgui.mask.WrappedSingleMask;
+import me.hsgamer.bettergui.maskedgui.mask.*;
 import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
 import me.hsgamer.hscore.bukkit.addon.PluginAddon;
 
@@ -24,6 +21,7 @@ public final class MaskedGUI extends PluginAddon {
         maskBuilder.register(WrappedMultiSlotMasks::new, "multi-slots", "multislots", "multi-slot", "multislot", "multi");
         maskBuilder.register(input -> new WrappedAnimatedMask(this, input), "animated", "animate", "anim");
         maskBuilder.register(input -> new TemplateMask(this, input), "template", "temp");
+        maskBuilder.register(PatternMask::new, "pattern", "pat");
     }
 
     @Override

@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class MaskedMenu extends BaseInventoryMenu<AdvancedButtonMap> {
-    private final AdvancedButtonMap buttonMap = new AdvancedButtonMap();
+    private AdvancedButtonMap buttonMap;
 
     public MaskedMenu(Config config) {
         super(config);
@@ -22,6 +22,7 @@ public class MaskedMenu extends BaseInventoryMenu<AdvancedButtonMap> {
 
     @Override
     protected AdvancedButtonMap createButtonMap(Config config) {
+        buttonMap = new AdvancedButtonMap();
         for (Map.Entry<String, Object> entry : config.getNormalizedValues(false).entrySet()) {
             String key = entry.getKey();
             Optional<Map<String, Object>> optionalValue = MapUtil.castOptionalStringObjectMap(entry.getValue());
@@ -44,6 +45,7 @@ public class MaskedMenu extends BaseInventoryMenu<AdvancedButtonMap> {
     }
 
     public void handleSignal(UUID uuid, Signal signal) {
+        if (buttonMap == null) return;
         MaskUtil.handleSignal(uuid, buttonMap.getMasks(), signal);
     }
 }

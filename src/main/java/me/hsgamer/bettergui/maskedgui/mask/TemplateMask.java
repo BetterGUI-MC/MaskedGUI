@@ -1,8 +1,9 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.maskedgui.MaskedGUI;
-import me.hsgamer.bettergui.maskedgui.api.BaseWrappedMask;
-import me.hsgamer.bettergui.maskedgui.api.WrappedMask;
+import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
+import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
+import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
 
@@ -61,6 +62,13 @@ public class TemplateMask extends BaseWrappedMask<WrappedMask> {
     public void refresh(UUID uuid) {
         if (mask != null) {
             mask.refresh(uuid);
+        }
+    }
+
+    @Override
+    public void handleSignal(UUID uuid, Signal signal) {
+        if (mask != null) {
+            mask.handleSignal(uuid, signal);
         }
     }
 

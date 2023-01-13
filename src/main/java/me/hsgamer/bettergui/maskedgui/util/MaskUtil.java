@@ -2,7 +2,8 @@ package me.hsgamer.bettergui.maskedgui.util;
 
 import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
-import me.hsgamer.bettergui.maskedgui.api.WrappedMask;
+import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
+import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.bukkit.gui.button.Button;
 import me.hsgamer.hscore.bukkit.gui.mask.Mask;
@@ -52,5 +53,12 @@ public final class MaskUtil {
                 .filter(WrappedMask.class::isInstance)
                 .map(WrappedMask.class::cast)
                 .forEach(mask -> mask.refresh(uuid));
+    }
+
+    public static void handleSignal(UUID uuid, Collection<Mask> masks, Signal signal) {
+        masks.stream()
+                .filter(WrappedMask.class::isInstance)
+                .map(WrappedMask.class::cast)
+                .forEach(mask -> mask.handleSignal(uuid, signal));
     }
 }

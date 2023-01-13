@@ -1,7 +1,8 @@
 package me.hsgamer.bettergui.maskedgui.menu;
 
-import me.hsgamer.bettergui.maskedgui.api.WrappedMask;
+import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
+import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.menu.BaseInventoryMenu;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.bukkit.gui.advanced.AdvancedButtonMap;
@@ -13,13 +14,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class MaskedMenu extends BaseInventoryMenu<AdvancedButtonMap> {
+    private final AdvancedButtonMap buttonMap = new AdvancedButtonMap();
+
     public MaskedMenu(Config config) {
         super(config);
     }
 
     @Override
     protected AdvancedButtonMap createButtonMap(Config config) {
-        AdvancedButtonMap buttonMap = new AdvancedButtonMap();
         for (Map.Entry<String, Object> entry : config.getNormalizedValues(false).entrySet()) {
             String key = entry.getKey();
             Optional<Map<String, Object>> optionalValue = MapUtil.castOptionalStringObjectMap(entry.getValue());
@@ -38,10 +40,10 @@ public class MaskedMenu extends BaseInventoryMenu<AdvancedButtonMap> {
 
     @Override
     protected void refreshButtonMapOnCreate(AdvancedButtonMap buttonMap, UUID uuid) {
-        buttonMap.getMasks()
-                .stream()
-                .filter(WrappedMask.class::isInstance)
-                .map(WrappedMask.class::cast)
-                .forEach(mask -> mask.refresh(uuid));
+        MaskUtil.refreshMasks(uuid, buttonMap.getMasks());
+    }
+
+    public void handleSignal(UUID uuid, Signal signal) {
+        MaskUtil.handleSignal(uuid, buttonMap.getMasks(), signal);
     }
 }

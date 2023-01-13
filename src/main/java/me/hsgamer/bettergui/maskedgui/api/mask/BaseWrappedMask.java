@@ -1,4 +1,4 @@
-package me.hsgamer.bettergui.maskedgui.api;
+package me.hsgamer.bettergui.maskedgui.api.mask;
 
 import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;

@@ -2,7 +2,7 @@ package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
-import me.hsgamer.bettergui.maskedgui.api.BaseWrappedMask;
+import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;

@@ -1,7 +1,7 @@
 package me.hsgamer.bettergui.maskedgui.builder;
 
 import me.hsgamer.bettergui.api.menu.Menu;
-import me.hsgamer.bettergui.maskedgui.api.WrappedMask;
+import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.hscore.builder.MassBuilder;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
 

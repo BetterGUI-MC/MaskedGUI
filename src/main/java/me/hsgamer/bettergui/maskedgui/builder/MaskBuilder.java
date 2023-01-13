@@ -2,6 +2,7 @@ package me.hsgamer.bettergui.maskedgui.builder;
 
 import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.maskedgui.api.WrappedMask;
+import me.hsgamer.bettergui.maskedgui.mask.WrappedAnimatedMask;
 import me.hsgamer.bettergui.maskedgui.mask.WrappedMultiSlotMasks;
 import me.hsgamer.bettergui.maskedgui.mask.WrappedSingleMask;
 import me.hsgamer.hscore.builder.MassBuilder;
@@ -20,6 +21,7 @@ public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMas
     private MaskBuilder() {
         register(WrappedSingleMask::new, "single", "simple");
         register(WrappedMultiSlotMasks::new, "multi-slots", "multislots", "multi-slot", "multislot", "multi");
+        register(WrappedAnimatedMask::new, "animated", "animate", "anim");
     }
 
     public void register(Function<Input, WrappedMask> creator, String... type) {
@@ -43,7 +45,7 @@ public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMas
         });
     }
 
-    public List<WrappedMask> getChildButtons(WrappedMask parentMask, Map<String, Object> section) {
+    public List<WrappedMask> getChildMasks(WrappedMask parentMask, Map<String, Object> section) {
         return section.entrySet()
                 .stream()
                 .filter(entry -> entry.getValue() instanceof Map)

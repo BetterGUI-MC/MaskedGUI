@@ -49,6 +49,7 @@ public class ProgressMask implements WrappedMask {
 
         int size = slots.size();
         int completeSize = (int) Math.round((double) current / max * size);
+        completeSize = Math.min(completeSize, size);
 
         Map<Integer, Button> buttonMap = new HashMap<>();
         for (int i = 0; i < completeSize; i++) {

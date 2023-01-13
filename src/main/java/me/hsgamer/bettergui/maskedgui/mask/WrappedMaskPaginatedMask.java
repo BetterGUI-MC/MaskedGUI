@@ -1,6 +1,7 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
+import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.util.MapUtil;
@@ -28,5 +29,11 @@ public class WrappedMaskPaginatedMask extends WrappedPaginatedMask<StaticMaskPag
     public void refresh(UUID uuid) {
         if (mask == null) return;
         MaskUtil.refreshMasks(uuid, mask.getMasks(uuid));
+    }
+
+    @Override
+    public void handleSignal(UUID uuid, Signal signal) {
+        super.handleSignal(uuid, signal);
+        MaskUtil.handleSignal(uuid, mask.getMasks(uuid), signal);
     }
 }

@@ -4,6 +4,7 @@ import me.hsgamer.bettergui.maskedgui.MaskedGUI;
 import me.hsgamer.bettergui.maskedgui.api.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
+import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.bukkit.gui.mask.impl.AnimatedMask;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
@@ -47,9 +48,6 @@ public class WrappedAnimatedMask extends BaseWrappedMask<AnimatedMask> {
     @Override
     public void refresh(UUID uuid) {
         if (mask == null) return;
-        mask.getMasks().stream()
-                .filter(WrappedMask.class::isInstance)
-                .map(WrappedMask.class::cast)
-                .forEach(wrappedMask -> wrappedMask.refresh(uuid));
+        MaskUtil.refreshMasks(uuid, mask.getMasks());
     }
 }

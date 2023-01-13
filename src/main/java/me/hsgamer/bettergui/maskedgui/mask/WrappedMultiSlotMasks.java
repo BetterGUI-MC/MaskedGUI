@@ -1,6 +1,5 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
-import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.maskedgui.api.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
@@ -29,9 +28,6 @@ public class WrappedMultiSlotMasks extends BaseWrappedMask<MultiSlotsMask> {
     @Override
     public void refresh(UUID uuid) {
         if (mask == null) return;
-        mask.getButtons().stream()
-                .filter(WrappedButton.class::isInstance)
-                .map(WrappedButton.class::cast)
-                .forEach(wrappedButton -> wrappedButton.refresh(uuid));
+        MaskUtil.refreshButtons(uuid, mask.getButtons());
     }
 }

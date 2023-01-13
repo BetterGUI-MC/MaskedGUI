@@ -4,6 +4,7 @@ import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.maskedgui.api.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
+import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.hscore.bukkit.gui.mask.impl.SingleMask;
 
@@ -29,9 +30,6 @@ public class WrappedSingleMask extends BaseWrappedMask<SingleMask> {
     @Override
     public void refresh(UUID uuid) {
         if (mask == null) return;
-        mask.generateButtons(uuid).values().stream()
-                .filter(WrappedButton.class::isInstance)
-                .map(WrappedButton.class::cast)
-                .forEach(button -> button.refresh(uuid));
+        MaskUtil.refreshButtons(uuid, mask.generateButtons(uuid).values());
     }
 }

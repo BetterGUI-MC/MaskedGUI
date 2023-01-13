@@ -46,9 +46,6 @@ public class PatternMask extends BaseWrappedMask<ButtonMapMask> {
     @Override
     public void refresh(UUID uuid) {
         if (mask == null) return;
-        mask.getButtons().stream()
-                .filter(WrappedButton.class::isInstance)
-                .map(WrappedButton.class::cast)
-                .forEach(button -> button.refresh(uuid));
+        MaskUtil.refreshButtons(uuid, mask.getButtons());
     }
 }

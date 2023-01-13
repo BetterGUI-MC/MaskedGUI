@@ -4,11 +4,11 @@ import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.maskedgui.api.WrappedMask;
 import me.hsgamer.bettergui.util.MapUtil;
+import me.hsgamer.hscore.bukkit.gui.button.Button;
+import me.hsgamer.hscore.bukkit.gui.mask.Mask;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public final class MaskUtil {
     private MaskUtil() {
@@ -38,5 +38,19 @@ public final class MaskUtil {
 
     public static Map<String, WrappedButton> createButtons(WrappedMask wrappedMask, Map<String, Object> buttonMap) {
         return createButtons(wrappedMask, buttonMap, true);
+    }
+
+    public static void refreshButtons(UUID uuid, Collection<Button> buttons) {
+        buttons.stream()
+                .filter(WrappedButton.class::isInstance)
+                .map(WrappedButton.class::cast)
+                .forEach(button -> button.refresh(uuid));
+    }
+
+    public static void refreshMasks(UUID uuid, Collection<Mask> masks) {
+        masks.stream()
+                .filter(WrappedMask.class::isInstance)
+                .map(WrappedMask.class::cast)
+                .forEach(mask -> mask.refresh(uuid));
     }
 }

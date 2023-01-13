@@ -8,7 +8,6 @@ import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.bukkit.gui.mask.impl.AnimatedMask;
-import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
 import me.hsgamer.hscore.common.Validate;
 
 import java.math.BigDecimal;
@@ -24,19 +23,18 @@ public class WrappedAnimatedMask extends BaseWrappedMask<AnimatedMask> {
 
     @Override
     protected AnimatedMask createMask(Map<String, Object> section) {
-        Map<String, Object> keys = new CaseInsensitiveStringMap<>(section);
-        long update = Optional.ofNullable(keys.get("update"))
+        long update = Optional.ofNullable(section.get("update"))
                 .map(String::valueOf)
                 .flatMap(Validate::getNumber)
                 .filter(bigDecimal -> bigDecimal.compareTo(BigDecimal.ZERO) > 0)
                 .map(BigDecimal::longValue)
                 .orElse(0L);
-        boolean async = Optional.ofNullable(keys.get("async"))
+        boolean async = Optional.ofNullable(section.get("async"))
                 .map(String::valueOf)
                 .map(Boolean::parseBoolean)
                 .orElse(true);
 
-        List<WrappedMask> frames = Optional.ofNullable(keys.get("child"))
+        List<WrappedMask> frames = Optional.ofNullable(section.get("child"))
                 .flatMap(MapUtil::castOptionalStringObjectMap)
                 .map(o -> MaskBuilder.INSTANCE.getChildMasks(this, o))
                 .orElse(Collections.emptyList());

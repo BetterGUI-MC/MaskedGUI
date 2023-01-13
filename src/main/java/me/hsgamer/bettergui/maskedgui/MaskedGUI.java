@@ -26,6 +26,9 @@ public final class MaskedGUI extends PluginAddon {
         MaskBuilder.INSTANCE.register(input -> new WrappedAnimatedMask(this, input), "animated", "animate", "anim");
         MaskBuilder.INSTANCE.register(input -> new TemplateMask(this, input), "template", "temp");
         MaskBuilder.INSTANCE.register(PatternMask::new, "pattern", "pat");
+        MaskBuilder.INSTANCE.register(WrappedButtonPaginatedMask::new, "button-paginated", "button-paginate", "button-pag", "button-page", "button-p");
+        MaskBuilder.INSTANCE.register(WrappedSequencePaginatedMask::new, "sequence-paginated", "sequence-paginate", "sequence-pag", "sequence-page", "sequence-p");
+        MaskBuilder.INSTANCE.register(WrappedMaskPaginatedMask::new, "mask-paginated", "mask-paginate", "mask-pag", "mask-page", "mask-p");
     }
 
     @Override

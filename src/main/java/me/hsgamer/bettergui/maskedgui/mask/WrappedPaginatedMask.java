@@ -21,7 +21,7 @@ public abstract class WrappedPaginatedMask<T extends PaginatedMask> extends Base
         });
     }
 
-    protected abstract T createPaginatedMask(Map<String, Object> map);
+    protected abstract T createPaginatedMask(Map<String, Object> section);
 
     @Override
     protected T createMask(Map<String, Object> section) {

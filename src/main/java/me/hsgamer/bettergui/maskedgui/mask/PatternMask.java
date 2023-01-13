@@ -19,7 +19,7 @@ public class PatternMask extends BaseWrappedMask<ButtonMapMask> {
 
     @Override
     protected ButtonMapMask createMask(Map<String, Object> section) {
-        List<String> pattern = CollectionUtils.createStringListFromObject(section.get("pattern"), true);
+        List<String> pattern = CollectionUtils.createStringListFromObject(section.get("pattern"));
         if (pattern.isEmpty()) return null;
         Map<String, List<Integer>> patternMap = new HashMap<>();
         for (int y = 0; y < pattern.size(); y++) {

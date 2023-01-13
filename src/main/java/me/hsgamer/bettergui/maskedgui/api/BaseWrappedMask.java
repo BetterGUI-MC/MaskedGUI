@@ -9,11 +9,11 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
-public abstract class BaseWrappedMask implements WrappedMask {
+public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
     protected final Menu menu;
     protected final String name;
     protected final Map<String, Object> options;
-    protected final Mask mask;
+    protected final T mask;
 
     protected BaseWrappedMask(MaskBuilder.Input input) {
         this.menu = input.menu;
@@ -22,10 +22,14 @@ public abstract class BaseWrappedMask implements WrappedMask {
         this.mask = createMask(options);
     }
 
-    protected abstract Mask createMask(Map<String, Object> section);
+    protected abstract T createMask(Map<String, Object> section);
 
     public Map<String, Object> getOptions() {
         return options;
+    }
+
+    public T getMask() {
+        return mask;
     }
 
     @Override

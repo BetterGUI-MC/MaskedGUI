@@ -14,7 +14,8 @@ import java.util.*;
 
 public class PatternMask implements WrappedMask {
     private final MaskBuilder.Input input;
-    private final Map<Button, List<Integer>> buttonSlotsMap = new HashMap<>();
+    private final List<Button> buttons = new ArrayList<>();
+    private final Map<Integer, Button> buttonMap = new HashMap<>();
 
     public PatternMask(MaskBuilder.Input input) {
         this.input = input;
@@ -27,19 +28,12 @@ public class PatternMask implements WrappedMask {
 
     @Override
     public Map<Integer, Button> generateButtons(UUID uuid) {
-        Map<Integer, Button> buttonMap = new HashMap<>();
-        for (Map.Entry<Button, List<Integer>> entry : this.buttonSlotsMap.entrySet()) {
-            Button button = entry.getKey();
-            for (int slot : entry.getValue()) {
-                buttonMap.put(slot, button);
-            }
-        }
         return buttonMap;
     }
 
     @Override
     public void refresh(UUID uuid) {
-        buttonSlotsMap.keySet().stream()
+        buttons.stream()
                 .filter(WrappedButton.class::isInstance)
                 .map(WrappedButton.class::cast)
                 .forEach(wrappedButton -> wrappedButton.refresh(uuid));
@@ -50,26 +44,27 @@ public class PatternMask implements WrappedMask {
         List<String> pattern = CollectionUtils.createStringListFromObject(input.options.get("pattern"), true);
         if (pattern.isEmpty()) return;
 
-        Optional<Map<String, Object>> optionalButtonMap = MapUtil.castOptionalStringObjectMap(MapUtil.getIfFound(input.options, "button", "buttons"));
-        if (!optionalButtonMap.isPresent()) return;
-        Map<String, WrappedButton> buttonMap = MaskUtil.createButtons(this, optionalButtonMap.get());
+        Optional<Map<String, Object>> optionalButtonElement = MapUtil.castOptionalStringObjectMap(MapUtil.getIfFound(input.options, "button", "buttons"));
+        if (!optionalButtonElement.isPresent()) return;
+        Map<String, WrappedButton> buttonElements = MaskUtil.createButtons(this, optionalButtonElement.get());
 
         for (int y = 0; y < pattern.size(); y++) {
             String line = pattern.get(y);
             for (int x = 0; x < line.length(); x++) {
                 char c = line.charAt(x);
                 if (c == ' ') continue;
-                WrappedButton button = buttonMap.get(String.valueOf(c));
+                WrappedButton button = buttonElements.get(String.valueOf(c));
                 if (button == null) continue;
-                buttonSlotsMap.computeIfAbsent(button, k -> new ArrayList<>()).add(MaskUtils.toSlot(x, y));
+                buttons.add(button);
+                buttonMap.put(MaskUtils.toSlot(x, y), button);
             }
         }
     }
 
     @Override
     public void stop() {
-        buttonSlotsMap.keySet().forEach(Button::stop);
-        buttonSlotsMap.clear();
+        buttons.forEach(Button::stop);
+        buttonMap.clear();
     }
 
     @Override

@@ -54,7 +54,7 @@ public class TemplateMask extends BaseWrappedMask<WrappedMask> {
             finalMap.replaceAll((s, o) -> replaceVariables(o, variableMap));
         }
 
-        return addon.getMaskBuilder().build(new MaskBuilder.Input(getMenu(), getName(), finalMap)).orElse(null);
+        return MaskBuilder.INSTANCE.build(new MaskBuilder.Input(getMenu(), getName(), finalMap)).orElse(null);
     }
 
     @Override

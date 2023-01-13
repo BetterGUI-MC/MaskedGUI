@@ -13,6 +13,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMask> {
+    public static final MaskBuilder INSTANCE = new MaskBuilder();
+
+    private MaskBuilder() {
+        super();
+    }
+
     public void register(Function<Input, WrappedMask> creator, String... type) {
         register(new Element<Input, WrappedMask>() {
             @Override

@@ -28,6 +28,7 @@ public class WrappedSingleMask extends BaseWrappedMask<SingleMask> {
 
     @Override
     public void refresh(UUID uuid) {
+        if (mask == null) return;
         mask.generateButtons(uuid).values().stream()
                 .filter(WrappedButton.class::isInstance)
                 .map(WrappedButton.class::cast)

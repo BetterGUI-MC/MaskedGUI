@@ -28,6 +28,7 @@ public class WrappedMultiSlotMasks extends BaseWrappedMask<MultiSlotsMask> {
 
     @Override
     public void refresh(UUID uuid) {
+        if (mask == null) return;
         mask.getButtons().stream()
                 .filter(WrappedButton.class::isInstance)
                 .map(WrappedButton.class::cast)

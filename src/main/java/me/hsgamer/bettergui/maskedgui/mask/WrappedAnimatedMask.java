@@ -36,7 +36,7 @@ public class WrappedAnimatedMask extends BaseWrappedMask<AnimatedMask> {
 
         List<WrappedMask> frames = Optional.ofNullable(keys.get("child"))
                 .flatMap(MapUtil::castOptionalStringObjectMap)
-                .map(o -> addon.getMaskBuilder().getChildMasks(this, o))
+                .map(o -> MaskBuilder.INSTANCE.getChildMasks(this, o))
                 .orElse(Collections.emptyList());
 
         AnimatedMask animatedMask = new AnimatedMask(getName(), addon.getPlugin(), update, async);
@@ -46,6 +46,7 @@ public class WrappedAnimatedMask extends BaseWrappedMask<AnimatedMask> {
 
     @Override
     public void refresh(UUID uuid) {
+        if (mask == null) return;
         mask.getMasks().stream()
                 .filter(WrappedMask.class::isInstance)
                 .map(WrappedMask.class::cast)

@@ -1,6 +1,5 @@
 package me.hsgamer.bettergui.maskedgui.menu;
 
-import me.hsgamer.bettergui.maskedgui.MaskedGUI;
 import me.hsgamer.bettergui.maskedgui.api.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.menu.BaseInventoryMenu;
@@ -14,11 +13,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class MaskedMenu extends BaseInventoryMenu<AdvancedButtonMap> {
-    private final MaskedGUI addon;
-
-    public MaskedMenu(MaskedGUI addon, Config config) {
+    public MaskedMenu(Config config) {
         super(config);
-        this.addon = addon;
     }
 
     @Override
@@ -30,7 +26,7 @@ public class MaskedMenu extends BaseInventoryMenu<AdvancedButtonMap> {
             if (key.equalsIgnoreCase("menu-settings") || !optionalValue.isPresent()) continue;
 
             Map<String, Object> values = new CaseInsensitiveStringMap<>(optionalValue.get());
-            addon.getMaskBuilder()
+            MaskBuilder.INSTANCE
                     .build(new MaskBuilder.Input(this, "mask_" + key, values))
                     .ifPresent(mask -> {
                         mask.init();

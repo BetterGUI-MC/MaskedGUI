@@ -13,13 +13,12 @@ public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
     protected final Menu menu;
     protected final String name;
     protected final Map<String, Object> options;
-    protected final T mask;
+    protected T mask;
 
     protected BaseWrappedMask(MaskBuilder.Input input) {
         this.menu = input.menu;
         this.name = input.name;
         this.options = input.options;
-        this.mask = createMask(options);
     }
 
     protected abstract T createMask(Map<String, Object> section);
@@ -49,6 +48,7 @@ public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
 
     @Override
     public void init() {
+        mask = createMask(options);
         if (mask != null) {
             mask.init();
         }

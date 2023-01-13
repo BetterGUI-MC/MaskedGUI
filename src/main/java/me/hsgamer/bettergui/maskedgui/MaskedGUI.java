@@ -8,20 +8,19 @@ import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
 import me.hsgamer.hscore.bukkit.addon.PluginAddon;
 
 public final class MaskedGUI extends PluginAddon {
-    private final MaskBuilder maskBuilder = new MaskBuilder();
     private final TemplateMaskConfig templateMaskConfig = new TemplateMaskConfig(this);
 
     @Override
     public void onEnable() {
         templateMaskConfig.setup();
 
-        MenuBuilder.INSTANCE.register(config -> new MaskedMenu(this, config), "masked");
+        MenuBuilder.INSTANCE.register(MaskedMenu::new, "masked");
 
-        maskBuilder.register(WrappedSingleMask::new, "single", "simple");
-        maskBuilder.register(WrappedMultiSlotMasks::new, "multi-slots", "multislots", "multi-slot", "multislot", "multi");
-        maskBuilder.register(input -> new WrappedAnimatedMask(this, input), "animated", "animate", "anim");
-        maskBuilder.register(input -> new TemplateMask(this, input), "template", "temp");
-        maskBuilder.register(PatternMask::new, "pattern", "pat");
+        MaskBuilder.INSTANCE.register(WrappedSingleMask::new, "single", "simple");
+        MaskBuilder.INSTANCE.register(WrappedMultiSlotMasks::new, "multi-slots", "multislots", "multi-slot", "multislot", "multi");
+        MaskBuilder.INSTANCE.register(input -> new WrappedAnimatedMask(this, input), "animated", "animate", "anim");
+        MaskBuilder.INSTANCE.register(input -> new TemplateMask(this, input), "template", "temp");
+        MaskBuilder.INSTANCE.register(PatternMask::new, "pattern", "pat");
     }
 
     @Override
@@ -32,10 +31,6 @@ public final class MaskedGUI extends PluginAddon {
     @Override
     public void onDisable() {
         templateMaskConfig.clear();
-    }
-
-    public MaskBuilder getMaskBuilder() {
-        return maskBuilder;
     }
 
     public TemplateMaskConfig getTemplateMaskConfig() {

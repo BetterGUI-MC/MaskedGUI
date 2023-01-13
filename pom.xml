@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <parent>
-    <groupId>me.hsgamer.bettergui</groupId>
-    <artifactId>addon-parent</artifactId>
-    <version>1.1</version>
-  </parent>
+    <parent>
+        <groupId>me.hsgamer.bettergui</groupId>
+        <artifactId>addon-parent</artifactId>
+        <version>1.1</version>
+    </parent>
 
-  <artifactId>ExampleAddon</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+    <artifactId>MaskedGUI</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
-  <name>ExampleAddon</name>
-  <description>An Example addon for BetterGUI</description>
+    <name>MaskedGUI</name>
+    <description>Advanced GUI with Masks</description>
 
-  <properties>
-    <project.mainClass>me.hsgamer.bettergui.exampleaddon.ExampleAddon</project.mainClass>
-  </properties>
+    <properties>
+        <project.mainClass>me.hsgamer.bettergui.maskedgui.MaskedGUI</project.mainClass>
+    </properties>
 
-  <repositories>
-    <repository>
-      <id>codemc-public</id>
-      <url>https://repo.codemc.io/repository/maven-public/</url>
-    </repository>
-  </repositories>
+    <repositories>
+        <repository>
+            <id>codemc-public</id>
+            <url>https://repo.codemc.io/repository/maven-public/</url>
+        </repository>
+    </repositories>
 </project>

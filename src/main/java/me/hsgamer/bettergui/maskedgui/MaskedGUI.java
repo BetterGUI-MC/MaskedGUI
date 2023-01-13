@@ -1,6 +1,8 @@
 package me.hsgamer.bettergui.maskedgui;
 
+import me.hsgamer.bettergui.builder.ActionBuilder;
 import me.hsgamer.bettergui.builder.MenuBuilder;
+import me.hsgamer.bettergui.maskedgui.action.ChangePageAction;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.config.TemplateMaskConfig;
 import me.hsgamer.bettergui.maskedgui.mask.*;
@@ -15,6 +17,9 @@ public final class MaskedGUI extends PluginAddon {
         templateMaskConfig.setup();
 
         MenuBuilder.INSTANCE.register(MaskedMenu::new, "masked");
+
+        ActionBuilder.INSTANCE.register(input -> new ChangePageAction(getPlugin(), input, true), "next-page");
+        ActionBuilder.INSTANCE.register(input -> new ChangePageAction(getPlugin(), input, false), "previous-page", "back-page");
 
         MaskBuilder.INSTANCE.register(WrappedSingleMask::new, "single", "simple");
         MaskBuilder.INSTANCE.register(WrappedMultiSlotMasks::new, "multi-slots", "multislots", "multi-slot", "multislot", "multi");

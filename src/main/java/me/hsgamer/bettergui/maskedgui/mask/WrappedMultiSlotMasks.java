@@ -6,7 +6,6 @@ import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.bettergui.util.MapUtil;
-import me.hsgamer.hscore.bukkit.gui.button.Button;
 import me.hsgamer.hscore.bukkit.gui.mask.impl.MultiSlotsMask;
 
 import java.util.List;
@@ -22,10 +21,8 @@ public class WrappedMultiSlotMasks extends BaseWrappedMask<MultiSlotsMask> {
     protected MultiSlotsMask createMask(Map<String, Object> section) {
         List<Integer> slots = MultiSlotUtil.getSlots(section);
         MultiSlotsMask mask = new MultiSlotsMask(getName(), slots);
-        MapUtil.castOptionalStringObjectMap(MapUtil.getIfFound(section, "button", "buttons")).ifPresent(map -> {
-            List<Button> buttons = MaskUtil.createButtons(this, map);
-            mask.addButtons(buttons);
-        });
+        MapUtil.castOptionalStringObjectMap(MapUtil.getIfFound(section, "button", "buttons"))
+                .ifPresent(map -> MaskUtil.createButtons(this, map).forEach(mask::addButtons));
         return mask;
     }
 

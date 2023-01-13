@@ -27,4 +27,22 @@
             <url>https://repo.codemc.io/repository/maven-public/</url>
         </repository>
     </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>me.hsgamer</groupId>
+            <artifactId>hscore-bukkit-gui-advanced</artifactId>
+            <version>4.1.37</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>me.hsgamer</groupId>
+                    <artifactId>hscore-bukkit-gui</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>me.hsgamer</groupId>
+                    <artifactId>hscore-ui</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
 </project>

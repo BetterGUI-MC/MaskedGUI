@@ -7,12 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MultiSlotUtil {
-    private static final String POS_X1 = "x1";
-    private static final String POS_Y1 = "y1";
-    private static final String POS_X2 = "x2";
-    private static final String POS_Y2 = "y2";
+    private static final Pattern GRAPH_PATTERN = Pattern.compile("(\\d+):(\\d+):(\\d+):(\\d+)(:[oO])?");
     private static final String POS_SLOT = "slot";
 
     private MultiSlotUtil() {
@@ -20,15 +19,16 @@ public class MultiSlotUtil {
     }
 
     public static List<Integer> getSlots(Map<String, Object> map) {
-        if (map.containsKey(POS_X1) && map.containsKey(POS_Y1) && map.containsKey(POS_X2) && map.containsKey(POS_Y2)) {
-            int x1 = Integer.parseInt(map.get(POS_X1).toString());
-            int y1 = Integer.parseInt(map.get(POS_Y1).toString());
-            int x2 = Integer.parseInt(map.get(POS_X2).toString());
-            int y2 = Integer.parseInt(map.get(POS_Y2).toString());
-            String slot = Optional.ofNullable(map.get(POS_SLOT)).map(Object::toString).orElse("");
-
+        String slot = Optional.ofNullable(map.get(POS_SLOT)).map(Object::toString).orElse("");
+        Matcher matcher = GRAPH_PATTERN.matcher(slot);
+        if (matcher.matches()) {
+            int x1 = Integer.parseInt(matcher.group(1));
+            int y1 = Integer.parseInt(matcher.group(2));
+            int x2 = Integer.parseInt(matcher.group(3));
+            int y2 = Integer.parseInt(matcher.group(4));
+            boolean outline = matcher.group(5) != null;
             List<Integer> slots = new ArrayList<>();
-            if (slot.equalsIgnoreCase("outline")) {
+            if (outline) {
                 MaskUtils.generateOutlineSlots(x1, y1, x2, y2).forEach(slots::add);
             } else {
                 MaskUtils.generateAreaSlots(x1, y1, x2, y2).forEach(slots::add);

@@ -19,7 +19,7 @@ public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMas
 
     private MaskBuilder() {
         register(WrappedSingleMask::new, "single", "simple");
-        register(WrappedMultiSlotMasks::new, "multi-slots");
+        register(WrappedMultiSlotMasks::new, "multi-slots", "multislots", "multi-slot", "multislot", "multi");
     }
 
     public void register(Function<Input, WrappedMask> creator, String... type) {

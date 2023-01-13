@@ -21,7 +21,7 @@ public final class MaskedGUI extends PluginAddon {
         ActionBuilder.INSTANCE.register(input -> new ChangePageAction(getPlugin(), input, true), "next-page");
         ActionBuilder.INSTANCE.register(input -> new ChangePageAction(getPlugin(), input, false), "previous-page", "back-page");
 
-        MaskBuilder.INSTANCE.register(WrappedSingleMask::new, "single", "simple");
+        MaskBuilder.INSTANCE.register(WrappedSimpleMask::new, "simple");
         MaskBuilder.INSTANCE.register(WrappedMultiSlotMasks::new, "multi-slots", "multislots", "multi-slot", "multislot", "multi");
         MaskBuilder.INSTANCE.register(input -> new WrappedAnimatedMask(this, input), "animated", "animate", "anim");
         MaskBuilder.INSTANCE.register(input -> new TemplateMask(this, input), "template", "temp");

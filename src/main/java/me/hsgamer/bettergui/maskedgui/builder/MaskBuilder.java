@@ -24,7 +24,7 @@ public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMas
             @Override
             public boolean canBuild(Input input) {
                 Map<String, Object> keys = new CaseInsensitiveStringMap<>(input.options);
-                Object typeObject = keys.get("type");
+                Object typeObject = keys.get("mask");
                 if (typeObject == null) return false;
                 String button = Objects.toString(typeObject);
                 for (String s : type) {

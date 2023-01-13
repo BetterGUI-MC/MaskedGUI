@@ -2,6 +2,8 @@ package me.hsgamer.bettergui.maskedgui.builder;
 
 import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.maskedgui.api.WrappedMask;
+import me.hsgamer.bettergui.maskedgui.mask.WrappedMultiSlotMasks;
+import me.hsgamer.bettergui.maskedgui.mask.WrappedSingleMask;
 import me.hsgamer.hscore.builder.MassBuilder;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
 
@@ -16,7 +18,8 @@ public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMas
     public static final MaskBuilder INSTANCE = new MaskBuilder();
 
     private MaskBuilder() {
-        // EMPTY
+        register(WrappedSingleMask::new, "single", "simple");
+        register(WrappedMultiSlotMasks::new, "multi-slots");
     }
 
     public void register(Function<Input, WrappedMask> creator, String... type) {
@@ -24,11 +27,9 @@ public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMas
             @Override
             public boolean canBuild(Input input) {
                 Map<String, Object> keys = new CaseInsensitiveStringMap<>(input.options);
-                Object typeObject = keys.get("mask");
-                if (typeObject == null) return false;
-                String button = Objects.toString(typeObject);
+                String mask = Objects.toString(keys.get("mask"), "simple");
                 for (String s : type) {
-                    if (button.equalsIgnoreCase(s)) {
+                    if (mask.equalsIgnoreCase(s)) {
                         return true;
                     }
                 }

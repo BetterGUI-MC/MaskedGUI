@@ -42,6 +42,11 @@ public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
     }
 
     @Override
+    public boolean canView(UUID uuid) {
+        return mask != null && mask.canView(uuid);
+    }
+
+    @Override
     public String getName() {
         return name;
     }

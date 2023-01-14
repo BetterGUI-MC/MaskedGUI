@@ -32,6 +32,17 @@ public class HybridMask implements WrappedMask {
     }
 
     @Override
+    public boolean canView(UUID uuid) {
+        boolean canView = false;
+        for (Mask mask : masks) {
+            if (mask.canView(uuid)) {
+                canView = true;
+            }
+        }
+        return canView;
+    }
+
+    @Override
     public String getName() {
         return input.name;
     }

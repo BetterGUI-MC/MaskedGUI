@@ -10,10 +10,11 @@ import me.hsgamer.hscore.bukkit.gui.button.Button;
 import me.hsgamer.hscore.bukkit.gui.mask.Mask;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class HybridMask implements WrappedMask {
     private final MaskBuilder.Input input;
-    private final List<Mask> masks = new ArrayList<>();
+    private final LinkedHashMap<Mask, Set<UUID>> maskMap = new LinkedHashMap<>();
 
     public HybridMask(MaskBuilder.Input input) {
         this.input = input;
@@ -27,16 +28,24 @@ public class HybridMask implements WrappedMask {
     @Override
     public Map<Integer, Button> generateButtons(UUID uuid) {
         Map<Integer, Button> buttonMap = new HashMap<>();
-        masks.forEach(mask -> buttonMap.putAll(mask.generateButtons(uuid)));
+        for (Map.Entry<Mask, Set<UUID>> entry : maskMap.entrySet()) {
+            if (entry.getValue().contains(uuid)) {
+                buttonMap.putAll(entry.getKey().generateButtons(uuid));
+            }
+        }
         return buttonMap;
     }
 
     @Override
     public boolean canView(UUID uuid) {
         boolean canView = false;
-        for (Mask mask : masks) {
-            if (mask.canView(uuid)) {
+        for (Map.Entry<Mask, Set<UUID>> entry : maskMap.entrySet()) {
+            Set<UUID> uuidSet = entry.getValue();
+            if (entry.getKey().canView(uuid)) {
+                uuidSet.add(uuid);
                 canView = true;
+            } else {
+                uuidSet.remove(uuid);
             }
         }
         return canView;
@@ -49,12 +58,12 @@ public class HybridMask implements WrappedMask {
 
     @Override
     public void refresh(UUID uuid) {
-        MaskUtil.refreshMasks(uuid, masks);
+        MaskUtil.refreshMasks(uuid, maskMap.keySet());
     }
 
     @Override
     public void handleSignal(UUID uuid, Signal signal) {
-        MaskUtil.handleSignal(uuid, masks, signal);
+        MaskUtil.handleSignal(uuid, maskMap.keySet(), signal);
     }
 
     @Override
@@ -62,13 +71,13 @@ public class HybridMask implements WrappedMask {
         Optional.ofNullable(input.options.get("child"))
                 .flatMap(MapUtil::castOptionalStringObjectMap)
                 .map(o -> MaskBuilder.INSTANCE.getChildMasks(this, o))
-                .ifPresent(masks::addAll);
-        masks.forEach(Mask::init);
+                .ifPresent(childMarks -> childMarks.forEach(mask -> maskMap.put(mask, new ConcurrentSkipListSet<>())));
+        maskMap.keySet().forEach(Mask::init);
     }
 
     @Override
     public void stop() {
-        masks.forEach(Mask::stop);
-        masks.clear();
+        maskMap.keySet().forEach(Mask::stop);
+        maskMap.clear();
     }
 }

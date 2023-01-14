@@ -31,6 +31,7 @@ public final class MaskedGUI extends PluginAddon {
         MaskBuilder.INSTANCE.register(WrappedMaskPaginatedMask::new, "mask-paginated", "mask-paginate", "mask-pag", "mask-page", "mask-p");
         MaskBuilder.INSTANCE.register(HybridMask::new, "hybrid", "hyb", "combine");
         MaskBuilder.INSTANCE.register(ProgressMask::new, "progress", "prog");
+        MaskBuilder.INSTANCE.register(WrappedListMask::new, "list");
     }
 
     @Override

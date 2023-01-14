@@ -29,7 +29,7 @@ public class WrappedPredicateMask extends BaseWrappedMask<PredicateMask> {
         PredicateMask predicateMask = new PredicateMask(getName());
 
         boolean checkOnlyOnCreation = Optional.ofNullable(section.get("check-only-on-creation")).map(String::valueOf).map(Boolean::parseBoolean).orElse(false);
-        Optional.ofNullable(section.get("view-requirement"))
+        Optional.ofNullable(MapUtil.getIfFound(section, "requirement", "view-requirement"))
                 .flatMap(MapUtil::castOptionalStringObjectMap)
                 .ifPresent(subsection -> {
                     RequirementApplier requirementApplier = new RequirementApplier(getMenu(), getName() + "_view", subsection);
@@ -48,7 +48,7 @@ public class WrappedPredicateMask extends BaseWrappedMask<PredicateMask> {
                         return result.isSuccess;
                     });
                 });
-        Optional.ofNullable(MapUtil.getIfFound(section, "success-mask", "success", "view-mask"))
+        Optional.ofNullable(MapUtil.getIfFound(section, "success-mask", "success", "view-mask", "view"))
                 .flatMap(MapUtil::castOptionalStringObjectMap)
                 .flatMap(subsection -> MaskBuilder.INSTANCE.build(new MaskBuilder.Input(getMenu(), getName() + "_success", subsection)))
                 .ifPresent(predicateMask::setMask);

@@ -19,7 +19,11 @@ public abstract class WrappedPaginatedMask<T extends PaginatedMask> extends Base
         super(input);
         input.menu.getVariableManager().register(getName() + "_page", (original, uuid) -> {
             if (mask == null) return null;
-            return Integer.toString(mask.getPage(uuid));
+            return Integer.toString(mask.getPage(uuid) + 1);
+        });
+        input.menu.getVariableManager().register(getName() + "_max", (original, uuid) -> {
+            if (mask == null) return null;
+            return Integer.toString(mask.getPageAmount(uuid));
         });
     }
 

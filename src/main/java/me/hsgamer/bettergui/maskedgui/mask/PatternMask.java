@@ -21,12 +21,13 @@ public class PatternMask extends BaseWrappedMask<ButtonMapMask> {
     protected ButtonMapMask createMask(Map<String, Object> section) {
         List<String> pattern = CollectionUtils.createStringListFromObject(section.get("pattern"));
         if (pattern.isEmpty()) return null;
-        Map<String, List<Integer>> patternMap = new HashMap<>();
+        Map<Character, List<Integer>> patternMap = new HashMap<>();
         for (int y = 0; y < pattern.size(); y++) {
             String line = pattern.get(y);
             for (int x = 0; x < line.length(); x++) {
-                String key = String.valueOf(line.charAt(x));
-                patternMap.computeIfAbsent(key, k -> new ArrayList<>()).add(MaskUtils.toSlot(x, y));
+                char c = line.charAt(x);
+                c = c == '.' ? ' ' : c;
+                patternMap.computeIfAbsent(c, k -> new ArrayList<>()).add(MaskUtils.toSlot(x, y));
             }
         }
 
@@ -35,10 +36,13 @@ public class PatternMask extends BaseWrappedMask<ButtonMapMask> {
         Map<String, WrappedButton> buttonElements = MaskUtil.createButtons(this, optionalButtonElement.get());
 
         Map<Button, List<Integer>> buttonMap = new HashMap<>();
-        for (Map.Entry<String, List<Integer>> entry : patternMap.entrySet()) {
-            WrappedButton button = buttonElements.get(entry.getKey());
-            if (button == null) continue;
-            buttonMap.put(button, entry.getValue());
+        for (Map.Entry<String, WrappedButton> entry : buttonElements.entrySet()) {
+            String keyString = entry.getKey();
+            char key = keyString.isEmpty() ? ' ' : keyString.charAt(0);
+            List<Integer> slots = patternMap.get(key);
+            if (slots != null) {
+                buttonMap.put(entry.getValue(), slots);
+            }
         }
         return new ButtonMapMask(getName(), buttonMap);
     }

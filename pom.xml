@@ -18,6 +18,7 @@
     <description>Advanced GUI with Masks</description>
 
     <properties>
+        <plugin.version>7.5</plugin.version>
         <project.mainClass>me.hsgamer.bettergui.maskedgui.MaskedGUI</project.mainClass>
     </properties>
 

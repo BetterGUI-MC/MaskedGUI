@@ -148,6 +148,7 @@ public class SequenceMask implements WrappedMask {
                 index++;
             } else {
                 maxed = true;
+                cancel();
             }
         }
 

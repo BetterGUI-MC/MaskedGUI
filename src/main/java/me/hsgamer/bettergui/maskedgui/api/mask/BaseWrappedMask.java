@@ -10,21 +10,17 @@ import java.util.Map;
 import java.util.UUID;
 
 public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
-    protected final Menu menu;
-    protected final String name;
-    protected final Map<String, Object> options;
+    protected final MaskBuilder.Input input;
     protected T mask;
 
     protected BaseWrappedMask(MaskBuilder.Input input) {
-        this.menu = input.menu;
-        this.name = input.name;
-        this.options = input.options;
+        this.input = input;
     }
 
     protected abstract T createMask(Map<String, Object> section);
 
     public Map<String, Object> getOptions() {
-        return options;
+        return input.options;
     }
 
     public T getMask() {
@@ -33,7 +29,7 @@ public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
 
     @Override
     public Menu getMenu() {
-        return menu;
+        return input.menu;
     }
 
     @Override
@@ -48,12 +44,12 @@ public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
 
     @Override
     public String getName() {
-        return name;
+        return input.name;
     }
 
     @Override
     public void init() {
-        mask = createMask(options);
+        mask = createMask(input.options);
         if (mask != null) {
             mask.init();
         }

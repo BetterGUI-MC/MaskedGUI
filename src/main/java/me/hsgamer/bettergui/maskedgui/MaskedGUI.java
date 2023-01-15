@@ -3,6 +3,7 @@ package me.hsgamer.bettergui.maskedgui;
 import me.hsgamer.bettergui.builder.ActionBuilder;
 import me.hsgamer.bettergui.builder.MenuBuilder;
 import me.hsgamer.bettergui.maskedgui.action.ChangePageAction;
+import me.hsgamer.bettergui.maskedgui.action.RefreshMaskAction;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.config.TemplateMaskConfig;
 import me.hsgamer.bettergui.maskedgui.mask.*;
@@ -20,6 +21,7 @@ public final class MaskedGUI extends PluginAddon {
 
         ActionBuilder.INSTANCE.register(input -> new ChangePageAction(getPlugin(), input, true), "next-page");
         ActionBuilder.INSTANCE.register(input -> new ChangePageAction(getPlugin(), input, false), "previous-page", "back-page");
+        ActionBuilder.INSTANCE.register(input -> new RefreshMaskAction(getPlugin(), input), "refresh-mask");
 
         MaskBuilder.INSTANCE.register(WrappedSimpleMask::new, "simple");
         MaskBuilder.INSTANCE.register(WrappedMultiSlotMasks::new, "multi-slots", "multislots", "multi-slot", "multislot", "multi");
@@ -33,6 +35,7 @@ public final class MaskedGUI extends PluginAddon {
         MaskBuilder.INSTANCE.register(ProgressMask::new, "progress", "prog");
         MaskBuilder.INSTANCE.register(WrappedListMask::new, "list");
         MaskBuilder.INSTANCE.register(WrappedPredicateMask::new, "predicate", "requirement");
+        MaskBuilder.INSTANCE.register(input -> new SequenceMask(this, input), "sequence");
     }
 
     @Override

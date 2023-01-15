@@ -98,10 +98,7 @@ public class SequenceMask implements WrappedMask {
 
     @Override
     public void init() {
-        Optional.ofNullable(input.options.get("child"))
-                .flatMap(MapUtil::castOptionalStringObjectMap)
-                .map(o -> MaskBuilder.INSTANCE.getChildMasks(this, o))
-                .ifPresent(masks::addAll);
+        masks.addAll(MaskUtil.createChildMasks(this, input.options));
         update = Optional.ofNullable(input.options.get("update"))
                 .map(String::valueOf)
                 .flatMap(Validate::getNumber)

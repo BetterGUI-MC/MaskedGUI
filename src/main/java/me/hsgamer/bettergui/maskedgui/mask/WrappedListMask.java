@@ -1,14 +1,13 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
-import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
-import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.bukkit.gui.mask.impl.ListMask;
 
-import java.util.*;
+import java.util.Map;
+import java.util.UUID;
 
 public class WrappedListMask extends BaseWrappedMask<ListMask> {
     public WrappedListMask(MaskBuilder.Input input) {
@@ -17,12 +16,8 @@ public class WrappedListMask extends BaseWrappedMask<ListMask> {
 
     @Override
     protected ListMask createMask(Map<String, Object> section) {
-        List<WrappedMask> masks = Optional.ofNullable(section.get("child"))
-                .flatMap(MapUtil::castOptionalStringObjectMap)
-                .map(o -> MaskBuilder.INSTANCE.getChildMasks(this, o))
-                .orElse(Collections.emptyList());
         ListMask listMask = new ListMask(getName());
-        masks.forEach(listMask::addChildMasks);
+        MaskUtil.createChildMasks(this, section).forEach(listMask::addChildMasks);
         return listMask;
     }
 

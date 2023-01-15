@@ -4,6 +4,7 @@ import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
+import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.bukkit.gui.button.Button;
 import me.hsgamer.hscore.bukkit.gui.mask.Mask;
@@ -51,5 +52,19 @@ public final class MaskUtil {
                 .filter(WrappedMask.class::isInstance)
                 .map(WrappedMask.class::cast)
                 .forEach(mask -> mask.handleSignal(uuid, signal));
+    }
+
+    public static List<WrappedMask> createChildMasks(WrappedMask mask, Map<String, Object> options) {
+        return Optional.ofNullable(options.get("child"))
+                .flatMap(MapUtil::castOptionalStringObjectMap)
+                .map(o -> MaskBuilder.INSTANCE.getChildMasks(mask, o))
+                .orElseGet(Collections::emptyList);
+    }
+
+    public static Map<String, WrappedButton> createChildButtons(WrappedMask mask, Map<String, Object> options) {
+        return Optional.ofNullable(MapUtil.getIfFound(options, "button", "buttons", "child"))
+                .flatMap(MapUtil::castOptionalStringObjectMap)
+                .map(o -> createButtons(mask, o))
+                .orElseGet(Collections::emptyMap);
     }
 }

@@ -5,7 +5,6 @@ import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
-import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.bukkit.gui.button.Button;
 import me.hsgamer.hscore.bukkit.gui.mask.Mask;
 
@@ -68,10 +67,7 @@ public class HybridMask implements WrappedMask {
 
     @Override
     public void init() {
-        Optional.ofNullable(input.options.get("child"))
-                .flatMap(MapUtil::castOptionalStringObjectMap)
-                .map(o -> MaskBuilder.INSTANCE.getChildMasks(this, o))
-                .ifPresent(childMarks -> childMarks.forEach(mask -> maskMap.put(mask, new ConcurrentSkipListSet<>())));
+        MaskUtil.createChildMasks(this, input.options).forEach(mask -> maskMap.put(mask, new ConcurrentSkipListSet<>()));
         maskMap.keySet().forEach(Mask::init);
     }
 

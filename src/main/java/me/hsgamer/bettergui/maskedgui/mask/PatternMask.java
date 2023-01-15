@@ -4,7 +4,6 @@ import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
-import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.bukkit.gui.button.Button;
 import me.hsgamer.hscore.bukkit.gui.mask.MaskUtils;
 import me.hsgamer.hscore.bukkit.gui.mask.impl.ButtonMapMask;
@@ -31,9 +30,7 @@ public class PatternMask extends BaseWrappedMask<ButtonMapMask> {
             }
         }
 
-        Optional<Map<String, Object>> optionalButtonElement = MapUtil.castOptionalStringObjectMap(MapUtil.getIfFound(section, "button", "buttons"));
-        if (!optionalButtonElement.isPresent()) return null;
-        Map<String, WrappedButton> buttonElements = MaskUtil.createButtons(this, optionalButtonElement.get());
+        Map<String, WrappedButton> buttonElements = MaskUtil.createChildButtons(this, section);
 
         Map<Button, List<Integer>> buttonMap = new HashMap<>();
         for (Map.Entry<String, WrappedButton> entry : buttonElements.entrySet()) {

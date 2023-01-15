@@ -6,12 +6,14 @@ import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
-import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.bukkit.gui.mask.impl.AnimatedMask;
 import me.hsgamer.hscore.common.Validate;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 public class WrappedAnimatedMask extends BaseWrappedMask<AnimatedMask> {
     private final MaskedGUI addon;
@@ -34,10 +36,7 @@ public class WrappedAnimatedMask extends BaseWrappedMask<AnimatedMask> {
                 .map(Boolean::parseBoolean)
                 .orElse(true);
 
-        List<WrappedMask> frames = Optional.ofNullable(section.get("child"))
-                .flatMap(MapUtil::castOptionalStringObjectMap)
-                .map(o -> MaskBuilder.INSTANCE.getChildMasks(this, o))
-                .orElse(Collections.emptyList());
+        List<WrappedMask> frames = MaskUtil.createChildMasks(this, section);
 
         AnimatedMask animatedMask = new AnimatedMask(getName(), addon.getPlugin(), update, async);
         frames.forEach(animatedMask::addChildMasks);

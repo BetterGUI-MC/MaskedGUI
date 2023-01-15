@@ -14,6 +14,6 @@ public class RefreshMaskAction extends SignalAction {
 
     @Override
     protected Signal createSignal(UUID uuid, String value) {
-        return new RefreshMaskSignal(getMenu(), value);
+        return new RefreshMaskSignal(value, getMenu());
     }
 }

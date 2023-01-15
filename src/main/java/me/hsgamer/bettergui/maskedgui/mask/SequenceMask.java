@@ -7,6 +7,7 @@ import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.signal.RefreshMaskSignal;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
+import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.bukkit.gui.button.Button;
 import me.hsgamer.hscore.bukkit.gui.mask.Mask;
@@ -22,10 +23,10 @@ public class SequenceMask implements WrappedMask {
     private final MaskBuilder.Input input;
     private final List<Mask> masks = new ArrayList<>();
     private final Map<UUID, SequenceRunner> runnerMap = new ConcurrentHashMap<>();
+    private final SignalHandler signalHandler = new SignalHandler();
     private long update = 0;
     private boolean async = true;
     private boolean viewLast = false;
-    private String signalId = "";
 
     public SequenceMask(MaskedGUI addon, MaskBuilder.Input input) {
         this.addon = addon;
@@ -91,12 +92,7 @@ public class SequenceMask implements WrappedMask {
 
     @Override
     public void handleSignal(UUID uuid, Signal signal) {
-        if (signal instanceof RefreshMaskSignal) {
-            RefreshMaskSignal refreshMaskSignal = (RefreshMaskSignal) signal;
-            if (refreshMaskSignal.id.equals(signalId)) {
-                refresh(uuid);
-            }
-        }
+        signalHandler.handle(uuid, signal);
         MaskUtil.handleSignal(uuid, masks, signal);
     }
 
@@ -120,12 +116,16 @@ public class SequenceMask implements WrappedMask {
                 .map(String::valueOf)
                 .map(Boolean::parseBoolean)
                 .orElse(viewLast);
-        signalId = Objects.toString(MapUtil.getIfFoundOrDefault(input.options, getName(), "signal", "signal-id"));
+
+        signalHandler
+                .setSignal(input.options, getName())
+                .addHandler(RefreshMaskSignal.class, (uuid, refreshMaskSignal) -> this.refresh(uuid));
         masks.forEach(Mask::init);
     }
 
     @Override
     public void stop() {
+        signalHandler.clear();
         runnerMap.values().forEach(SequenceRunner::stop);
         runnerMap.clear();
         masks.forEach(Mask::stop);

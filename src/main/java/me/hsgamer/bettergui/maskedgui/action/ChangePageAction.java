@@ -17,7 +17,7 @@ public class ChangePageAction extends SignalAction {
 
     @Override
     protected Signal createSignal(UUID uuid, String value) {
-        return new ChangePageSignal(getMenu(), value, next);
+        return new ChangePageSignal(value, getMenu(), next);
     }
 
     @Override

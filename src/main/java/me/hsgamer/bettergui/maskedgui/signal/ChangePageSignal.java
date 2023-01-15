@@ -1,21 +1,17 @@
 package me.hsgamer.bettergui.maskedgui.signal;
 
 import me.hsgamer.bettergui.api.menu.Menu;
-import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
+import me.hsgamer.bettergui.maskedgui.api.signal.BaseSignal;
 
-public class ChangePageSignal implements Signal {
-    public final Menu menu;
-    public final String id;
-    public final boolean next;
+public class ChangePageSignal extends BaseSignal {
+    private final boolean next;
 
-    public ChangePageSignal(Menu menu, String id, boolean next) {
-        this.menu = menu;
-        this.id = id;
+    public ChangePageSignal(String name, Menu menu, boolean next) {
+        super(name, menu);
         this.next = next;
     }
 
-    @Override
-    public Menu getMenu() {
-        return menu;
+    public boolean isNext() {
+        return next;
     }
 }

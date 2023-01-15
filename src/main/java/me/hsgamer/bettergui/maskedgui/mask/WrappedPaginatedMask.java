@@ -4,16 +4,15 @@ import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.signal.ChangePageSignal;
-import me.hsgamer.bettergui.util.MapUtil;
+import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
 import me.hsgamer.hscore.bukkit.gui.mask.impl.PaginatedMask;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 public abstract class WrappedPaginatedMask<T extends PaginatedMask> extends BaseWrappedMask<T> {
-    private String signalId = "";
+    protected final SignalHandler signalHandler = new SignalHandler();
 
     protected WrappedPaginatedMask(MaskBuilder.Input input) {
         super(input);
@@ -33,21 +32,26 @@ public abstract class WrappedPaginatedMask<T extends PaginatedMask> extends Base
     protected T createMask(Map<String, Object> section) {
         T mask = createPaginatedMask(section);
         Optional.ofNullable(section.get("cycle")).map(Object::toString).map(Boolean::parseBoolean).ifPresent(mask::setCycle);
-        signalId = Objects.toString(MapUtil.getIfFoundOrDefault(section, getName(), "signal", "signal-id"));
+        signalHandler
+                .setSignal(section, getName())
+                .addHandler(ChangePageSignal.class, (uuid, changePageSignal) -> {
+                    if (changePageSignal.isNext()) {
+                        mask.nextPage(uuid);
+                    } else {
+                        mask.previousPage(uuid);
+                    }
+                });
         return mask;
     }
 
     @Override
     public void handleSignal(UUID uuid, Signal signal) {
-        if (signal instanceof ChangePageSignal) {
-            ChangePageSignal changePageSignal = (ChangePageSignal) signal;
-            if (signalId.equals(changePageSignal.id)) {
-                if (changePageSignal.next) {
-                    mask.nextPage(uuid);
-                } else {
-                    mask.previousPage(uuid);
-                }
-            }
-        }
+        signalHandler.handle(uuid, signal);
+    }
+
+    @Override
+    public void stop() {
+        signalHandler.clear();
+        super.stop();
     }
 }

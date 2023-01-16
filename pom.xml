@@ -33,7 +33,7 @@
         <dependency>
             <groupId>me.hsgamer</groupId>
             <artifactId>hscore-bukkit-gui-advanced</artifactId>
-            <version>4.1.44</version>
+            <version>4.1.45</version>
             <exclusions>
                 <exclusion>
                     <groupId>me.hsgamer</groupId>

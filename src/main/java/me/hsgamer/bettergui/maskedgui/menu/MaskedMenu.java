@@ -24,15 +24,22 @@ public class MaskedMenu extends BaseInventoryMenu<AdvancedButtonMap> {
         for (Map.Entry<String, Object> entry : config.getNormalizedValues(false).entrySet()) {
             String key = entry.getKey();
             Optional<Map<String, Object>> optionalValue = MapUtil.castOptionalStringObjectMap(entry.getValue());
-            if (key.equalsIgnoreCase("menu-settings") || !optionalValue.isPresent()) continue;
-
-            Map<String, Object> values = new CaseInsensitiveStringMap<>(optionalValue.get());
-            MaskBuilder.INSTANCE
-                    .build(new MaskBuilder.Input(this, "mask_" + key, values))
-                    .ifPresent(mask -> {
-                        mask.init();
-                        buttonMap.addMask(mask);
-                    });
+            if (!optionalValue.isPresent()) continue;
+            Map<String, Object> value = optionalValue.get();
+            if (key.equalsIgnoreCase("menu-settings")) {
+                Optional.ofNullable(MapUtil.getIfFound(value, "slot-duplicate", "slot-duplication"))
+                        .map(String::valueOf)
+                        .map(Boolean::parseBoolean)
+                        .ifPresent(buttonMap::setAllowSlotDuplication);
+            } else {
+                Map<String, Object> values = new CaseInsensitiveStringMap<>(value);
+                MaskBuilder.INSTANCE
+                        .build(new MaskBuilder.Input(this, "mask_" + key, values))
+                        .ifPresent(mask -> {
+                            mask.init();
+                            buttonMap.addMask(mask);
+                        });
+            }
         }
         return buttonMap;
     }

@@ -35,7 +35,7 @@ public final class MaskedGUI extends PluginAddon {
         MaskBuilder.INSTANCE.register(ProgressMask::new, "progress", "prog");
         MaskBuilder.INSTANCE.register(WrappedListMask::new, "list");
         MaskBuilder.INSTANCE.register(WrappedPredicateMask::new, "predicate", "requirement");
-        MaskBuilder.INSTANCE.register(input -> new SequenceMask(this, input), "sequence");
+        MaskBuilder.INSTANCE.register(input -> new OneTimeAnimatedMask(this, input), "one-time-animated", "one-time-animate", "one-time-anim");
     }
 
     @Override

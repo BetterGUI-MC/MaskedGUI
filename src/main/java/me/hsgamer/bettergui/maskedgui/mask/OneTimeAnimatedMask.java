@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class SequenceMask implements WrappedMask {
+public class OneTimeAnimatedMask implements WrappedMask {
     private final MaskedGUI addon;
     private final MaskBuilder.Input input;
     private final List<Mask> masks = new ArrayList<>();
@@ -28,7 +28,7 @@ public class SequenceMask implements WrappedMask {
     private boolean async = true;
     private boolean viewLast = false;
 
-    public SequenceMask(MaskedGUI addon, MaskBuilder.Input input) {
+    public OneTimeAnimatedMask(MaskedGUI addon, MaskBuilder.Input input) {
         this.addon = addon;
         this.input = input;
     }

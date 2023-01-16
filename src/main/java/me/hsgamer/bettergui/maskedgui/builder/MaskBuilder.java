@@ -14,9 +14,14 @@ import java.util.stream.Stream;
 
 public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMask> {
     public static final MaskBuilder INSTANCE = new MaskBuilder();
+    private String defaultMaskType = "";
 
     private MaskBuilder() {
         super();
+    }
+
+    public void setDefaultMaskType(String defaultMaskType) {
+        this.defaultMaskType = defaultMaskType;
     }
 
     public void register(Function<Input, WrappedMask> creator, String... type) {
@@ -24,7 +29,7 @@ public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMas
             @Override
             public boolean canBuild(Input input) {
                 Map<String, Object> keys = new CaseInsensitiveStringMap<>(input.options);
-                String mask = Objects.toString(keys.get("mask"), "simple");
+                String mask = Objects.toString(keys.get("mask"), defaultMaskType);
                 for (String s : type) {
                     if (mask.equalsIgnoreCase(s)) {
                         return true;

@@ -55,7 +55,7 @@ public final class MaskUtil {
     }
 
     public static List<WrappedMask> createChildMasks(WrappedMask mask, Map<String, Object> options) {
-        return Optional.ofNullable(options.get("child"))
+        return Optional.ofNullable(MapUtil.getIfFound(options, "masks", "child"))
                 .flatMap(MapUtil::castOptionalStringObjectMap)
                 .map(o -> MaskBuilder.INSTANCE.getChildMasks(mask, o))
                 .orElseGet(Collections::emptyList);

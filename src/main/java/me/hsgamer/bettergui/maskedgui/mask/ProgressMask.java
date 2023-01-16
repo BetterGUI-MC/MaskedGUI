@@ -9,6 +9,7 @@ import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
 import me.hsgamer.hscore.bukkit.gui.button.Button;
+import me.hsgamer.hscore.common.Validate;
 
 import java.util.*;
 
@@ -38,17 +39,11 @@ public class ProgressMask implements WrappedMask {
         String parsedCurrentValue = StringReplacerApplier.replace(currentValue, uuid, this);
         String parsedMaxValue = StringReplacerApplier.replace(maxValue, uuid, this);
 
-        int current;
-        int max;
-        try {
-            current = Integer.parseInt(parsedCurrentValue);
-            max = Integer.parseInt(parsedMaxValue);
-        } catch (Exception e) {
-            return Collections.emptyMap();
-        }
+        double current = Validate.getNumber(parsedCurrentValue).map(Number::doubleValue).orElse(0.0);
+        double max = Validate.getNumber(parsedMaxValue).map(Number::doubleValue).orElse(100.0);
 
         int size = slots.size();
-        int completeSize = (int) Math.round((double) current / max * size);
+        int completeSize = max <= 0 || current < 0 ? 0 : (int) Math.round(current / max * size);
         completeSize = Math.min(completeSize, size);
 
         Map<Integer, Button> buttonMap = new HashMap<>();

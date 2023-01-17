@@ -22,10 +22,10 @@ public class MultiSlotUtil {
         String slot = Optional.ofNullable(map.get(POS_SLOT)).map(Object::toString).orElse("");
         Matcher matcher = GRAPH_PATTERN.matcher(slot);
         if (matcher.matches()) {
-            int x1 = Integer.parseInt(matcher.group(1));
-            int y1 = Integer.parseInt(matcher.group(2));
-            int x2 = Integer.parseInt(matcher.group(3));
-            int y2 = Integer.parseInt(matcher.group(4));
+            int x1 = Math.max(1, Integer.parseInt(matcher.group(1))) - 1;
+            int y1 = Math.max(1, Integer.parseInt(matcher.group(2))) - 1;
+            int x2 = Math.max(1, Integer.parseInt(matcher.group(3))) - 1;
+            int y2 = Math.max(1, Integer.parseInt(matcher.group(4))) - 1;
             boolean outline = matcher.group(5) != null;
             List<Integer> slots = new ArrayList<>();
             if (outline) {

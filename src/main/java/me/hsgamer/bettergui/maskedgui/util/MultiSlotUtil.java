@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MultiSlotUtil {
-    private static final Pattern GRAPH_PATTERN = Pattern.compile("(\\d+):(\\d+):(\\d+):(\\d+)(:[oO])?");
+    private static final Pattern GRAPH_PATTERN = Pattern.compile("(\\d+)-(\\d+)-(\\d+)-(\\d+)(-[oO])?");
     private static final String POS_SLOT = "slot";
 
     private MultiSlotUtil() {

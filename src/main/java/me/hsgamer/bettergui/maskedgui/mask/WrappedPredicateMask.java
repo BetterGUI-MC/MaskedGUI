@@ -62,6 +62,7 @@ public class WrappedPredicateMask extends BaseWrappedMask<PredicateMask> {
     @Override
     public void refresh(UUID uuid) {
         if (mask == null) return;
+        checked.remove(uuid);
         Optional.ofNullable(mask.getMask())
                 .filter(WrappedMask.class::isInstance)
                 .map(WrappedMask.class::cast)

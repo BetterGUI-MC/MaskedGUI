@@ -9,6 +9,9 @@ import me.hsgamer.bettergui.maskedgui.config.TemplateMaskConfig;
 import me.hsgamer.bettergui.maskedgui.mask.*;
 import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
 import me.hsgamer.hscore.bukkit.addon.PluginAddon;
+import me.hsgamer.hscore.checker.spigotmc.SpigotVersionChecker;
+
+import java.util.logging.Level;
 
 public final class MaskedGUI extends PluginAddon {
     private final TemplateMaskConfig templateMaskConfig = new TemplateMaskConfig(this);
@@ -37,6 +40,16 @@ public final class MaskedGUI extends PluginAddon {
         MaskBuilder.INSTANCE.register(WrappedListMask::new, "list");
         MaskBuilder.INSTANCE.register(WrappedPredicateMask::new, "predicate", "requirement");
         MaskBuilder.INSTANCE.register(input -> new OneTimeAnimatedMask(this, input), "one-time-animated", "one-time-animate", "one-time-anim", "animated-one-time", "animate-one-time", "anim-one-time", "animated-once", "animate-once", "anim-once");
+
+        new SpigotVersionChecker(107475).getVersion().whenComplete((output, throwable) -> {
+            if (throwable != null) {
+                getPlugin().getLogger().log(Level.WARNING, "Cannot check the latest version of MaskedGUI", throwable);
+            } else if (this.getDescription().getVersion().equalsIgnoreCase(output)) {
+                getPlugin().getLogger().info("You are using the latest version of MaskedGUI");
+            } else {
+                getPlugin().getLogger().warning("You are using an outdated version of MaskedGUI. Please update to " + output);
+            }
+        });
     }
 
     @Override

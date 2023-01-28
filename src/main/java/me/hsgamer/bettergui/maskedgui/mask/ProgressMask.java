@@ -78,12 +78,14 @@ public class ProgressMask implements WrappedMask {
         slots = MultiSlotUtil.getSlots(section);
 
         completeButton = MapUtil.castOptionalStringObjectMap(MapUtil.getIfFound(section, "complete-button", "complete", "current-button"))
-                .<Button>flatMap(map -> ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(menu, name + "_complete_button", map)))
+                .flatMap(map -> ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(menu, name + "_complete_button", map)))
+                .map(Button.class::cast)
                 .orElse(Button.EMPTY);
         completeButton.init();
 
         incompleteButton = MapUtil.castOptionalStringObjectMap(MapUtil.getIfFound(section, "incomplete-button", "incomplete", "max-button"))
-                .<Button>flatMap(map -> ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(menu, name + "_incomplete_button", map)))
+                .flatMap(map -> ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(menu, name + "_incomplete_button", map)))
+                .map(Button.class::cast)
                 .orElse(Button.EMPTY);
         incompleteButton.init();
     }

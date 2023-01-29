@@ -4,10 +4,9 @@ import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
-import me.hsgamer.hscore.bukkit.gui.button.Button;
-import me.hsgamer.hscore.bukkit.gui.mask.MaskUtils;
-import me.hsgamer.hscore.bukkit.gui.mask.impl.ButtonMapMask;
 import me.hsgamer.hscore.common.CollectionUtils;
+import me.hsgamer.hscore.minecraft.gui.mask.MaskUtils;
+import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonMapMask;
 
 import java.util.*;
 
@@ -32,21 +31,20 @@ public class PatternMask extends BaseWrappedMask<ButtonMapMask> {
 
         Map<String, WrappedButton> buttonElements = MaskUtil.createChildButtons(this, section);
 
-        Map<Button, List<Integer>> buttonMap = new HashMap<>();
+        ButtonMapMask mask = new ButtonMapMask(getName());
         for (Map.Entry<String, WrappedButton> entry : buttonElements.entrySet()) {
             String keyString = entry.getKey();
             char key = keyString.isEmpty() ? ' ' : keyString.charAt(0);
             List<Integer> slots = patternMap.get(key);
             if (slots != null) {
-                buttonMap.put(entry.getValue(), slots);
+                mask.addButton(entry.getValue(), slots);
             }
         }
-        return new ButtonMapMask(getName(), buttonMap);
+        return mask;
     }
 
     @Override
-    public void refresh(UUID uuid) {
-        if (mask == null) return;
+    protected void refresh(ButtonMapMask mask, UUID uuid) {
         MaskUtil.refreshButtons(uuid, mask.getButtons());
     }
 }

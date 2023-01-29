@@ -8,8 +8,8 @@ import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
-import me.hsgamer.hscore.bukkit.gui.button.Button;
 import me.hsgamer.hscore.common.Validate;
+import me.hsgamer.hscore.minecraft.gui.button.Button;
 
 import java.util.*;
 

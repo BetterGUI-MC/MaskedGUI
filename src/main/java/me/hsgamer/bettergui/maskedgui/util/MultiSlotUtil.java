@@ -1,7 +1,7 @@
 package me.hsgamer.bettergui.maskedgui.util;
 
 import me.hsgamer.bettergui.util.SlotUtil;
-import me.hsgamer.hscore.bukkit.gui.mask.MaskUtils;
+import me.hsgamer.hscore.minecraft.gui.mask.MaskUtils;
 
 import java.util.ArrayList;
 import java.util.List;

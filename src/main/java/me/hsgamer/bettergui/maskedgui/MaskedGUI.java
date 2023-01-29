@@ -29,13 +29,13 @@ public final class MaskedGUI extends PluginAddon {
         MaskBuilder.INSTANCE.setDefaultMaskType("simple");
         MaskBuilder.INSTANCE.register(WrappedSimpleMask::new, "simple");
         MaskBuilder.INSTANCE.register(WrappedMultiSlotMasks::new, "multi-slots", "multislots", "multi-slot", "multislot", "multi");
-        MaskBuilder.INSTANCE.register(input -> new WrappedAnimatedMask(this, input), "animated", "animate", "anim");
+        MaskBuilder.INSTANCE.register(WrappedAnimatedMask::new, "animated", "animate", "anim");
         MaskBuilder.INSTANCE.register(input -> new TemplateMask(this, input), "template", "temp");
         MaskBuilder.INSTANCE.register(PatternMask::new, "pattern", "pat");
         MaskBuilder.INSTANCE.register(WrappedButtonPaginatedMask::new, "button-paginated", "button-paginate", "button-pag", "button-page", "button-p");
         MaskBuilder.INSTANCE.register(WrappedSequencePaginatedMask::new, "sequence-paginated", "sequence-paginate", "sequence-pag", "sequence-page", "sequence-p");
         MaskBuilder.INSTANCE.register(WrappedMaskPaginatedMask::new, "mask-paginated", "mask-paginate", "mask-pag", "mask-page", "mask-p");
-        MaskBuilder.INSTANCE.register(HybridMask::new, "hybrid", "hyb", "combine");
+        MaskBuilder.INSTANCE.register(WrappedHybridMask::new, "hybrid", "hyb", "combine");
         MaskBuilder.INSTANCE.register(ProgressMask::new, "progress", "prog");
         MaskBuilder.INSTANCE.register(WrappedListMask::new, "list");
         MaskBuilder.INSTANCE.register(WrappedPredicateMask::new, "predicate", "requirement");

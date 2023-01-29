@@ -4,9 +4,8 @@ import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
-import me.hsgamer.hscore.bukkit.gui.mask.impl.MultiSlotsMask;
+import me.hsgamer.hscore.minecraft.gui.mask.impl.MultiSlotsMask;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -17,15 +16,11 @@ public class WrappedMultiSlotMasks extends BaseWrappedMask<MultiSlotsMask> {
 
     @Override
     protected MultiSlotsMask createMask(Map<String, Object> section) {
-        List<Integer> slots = MultiSlotUtil.getSlots(section);
-        MultiSlotsMask mask = new MultiSlotsMask(getName(), slots);
-        MaskUtil.createChildButtons(this, section).forEach((key, value) -> mask.addButtons(value));
-        return mask;
+        return new MultiSlotsMask(getName(), MultiSlotUtil.getSlots(section)).addButton(MaskUtil.createChildButtons(this, section).values());
     }
 
     @Override
-    public void refresh(UUID uuid) {
-        if (mask == null) return;
+    protected void refresh(MultiSlotsMask mask, UUID uuid) {
         MaskUtil.refreshButtons(uuid, mask.getButtons());
     }
 }

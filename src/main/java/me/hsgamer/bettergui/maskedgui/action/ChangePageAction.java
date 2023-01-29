@@ -19,9 +19,4 @@ public class ChangePageAction extends SignalAction {
     protected Signal createSignal(UUID uuid, String value) {
         return new ChangePageSignal(value, getMenu(), next);
     }
-
-    @Override
-    protected boolean shouldBeTrimmed() {
-        return true;
-    }
 }

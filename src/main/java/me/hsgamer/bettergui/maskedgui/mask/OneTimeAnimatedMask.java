@@ -9,9 +9,9 @@ import me.hsgamer.bettergui.maskedgui.signal.RefreshMaskSignal;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
 import me.hsgamer.bettergui.util.MapUtil;
-import me.hsgamer.hscore.bukkit.gui.button.Button;
-import me.hsgamer.hscore.bukkit.gui.mask.Mask;
 import me.hsgamer.hscore.common.Validate;
+import me.hsgamer.hscore.minecraft.gui.button.Button;
+import me.hsgamer.hscore.minecraft.gui.mask.Mask;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.math.BigDecimal;

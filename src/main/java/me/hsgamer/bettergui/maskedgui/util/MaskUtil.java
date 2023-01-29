@@ -6,9 +6,9 @@ import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.util.MapUtil;
-import me.hsgamer.hscore.bukkit.gui.button.Button;
-import me.hsgamer.hscore.bukkit.gui.mask.Mask;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
+import me.hsgamer.hscore.minecraft.gui.button.Button;
+import me.hsgamer.hscore.minecraft.gui.mask.Mask;
 
 import java.util.*;
 

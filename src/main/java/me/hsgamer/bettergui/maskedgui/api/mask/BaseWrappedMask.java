@@ -1,23 +1,32 @@
 package me.hsgamer.bettergui.maskedgui.api.mask;
 
 import me.hsgamer.bettergui.api.menu.Menu;
+import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.hscore.bukkit.gui.button.Button;
-import me.hsgamer.hscore.bukkit.gui.mask.Mask;
+import me.hsgamer.hscore.minecraft.gui.button.Button;
+import me.hsgamer.hscore.minecraft.gui.mask.Mask;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
 public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
-    protected final MaskBuilder.Input input;
-    protected T mask;
+    private final MaskBuilder.Input input;
+    private T mask;
 
     protected BaseWrappedMask(MaskBuilder.Input input) {
         this.input = input;
     }
 
     protected abstract T createMask(Map<String, Object> section);
+
+    protected void handleSignal(T mask, UUID uuid, Signal signal) {
+        // EMPTY
+    }
+
+    protected void refresh(T mask, UUID uuid) {
+        // EMPTY
+    }
 
     public Map<String, Object> getOptions() {
         return input.options;
@@ -59,6 +68,20 @@ public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
     public void stop() {
         if (mask != null) {
             mask.stop();
+        }
+    }
+
+    @Override
+    public final void handleSignal(UUID uuid, Signal signal) {
+        if (mask != null) {
+            handleSignal(mask, uuid, signal);
+        }
+    }
+
+    @Override
+    public final void refresh(UUID uuid) {
+        if (mask != null) {
+            refresh(mask, uuid);
         }
     }
 }

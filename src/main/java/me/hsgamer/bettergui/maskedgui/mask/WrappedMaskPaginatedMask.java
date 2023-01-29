@@ -3,7 +3,7 @@ package me.hsgamer.bettergui.maskedgui.mask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
-import me.hsgamer.hscore.bukkit.gui.mask.impl.StaticMaskPaginatedMask;
+import me.hsgamer.hscore.minecraft.gui.mask.impl.StaticMaskPaginatedMask;
 
 import java.util.Map;
 import java.util.UUID;
@@ -15,20 +15,17 @@ public class WrappedMaskPaginatedMask extends WrappedPaginatedMask<StaticMaskPag
 
     @Override
     protected StaticMaskPaginatedMask createPaginatedMask(Map<String, Object> section) {
-        StaticMaskPaginatedMask animatedMask = new StaticMaskPaginatedMask(getName());
-        MaskUtil.createChildMasks(this, section).forEach(animatedMask::addMasks);
-        return animatedMask;
+        return new StaticMaskPaginatedMask(getName()).addMask(MaskUtil.createChildMasks(this, section));
     }
 
     @Override
-    public void refresh(UUID uuid) {
-        if (mask == null) return;
+    protected void refresh(StaticMaskPaginatedMask mask, UUID uuid) {
         MaskUtil.refreshMasks(uuid, mask.getMasks(uuid));
     }
 
     @Override
-    public void handleSignal(UUID uuid, Signal signal) {
-        super.handleSignal(uuid, signal);
+    protected void handleSignal(StaticMaskPaginatedMask mask, UUID uuid, Signal signal) {
+        super.handleSignal(mask, uuid, signal);
         MaskUtil.handleSignal(uuid, mask.getMasks(uuid), signal);
     }
 }

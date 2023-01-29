@@ -9,7 +9,7 @@ import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.requirement.RequirementApplier;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.bettergui.util.ProcessApplierConstants;
-import me.hsgamer.hscore.bukkit.gui.mask.impl.PredicateMask;
+import me.hsgamer.hscore.minecraft.gui.mask.impl.PredicateMask;
 
 import java.util.Map;
 import java.util.Optional;
@@ -60,27 +60,25 @@ public class WrappedPredicateMask extends BaseWrappedMask<PredicateMask> {
     }
 
     @Override
-    public void refresh(UUID uuid) {
-        if (mask == null) return;
+    protected void refresh(PredicateMask mask, UUID uuid) {
         checked.remove(uuid);
-        Optional.ofNullable(mask.getMask())
+        Optional.of(mask.getMask())
                 .filter(WrappedMask.class::isInstance)
                 .map(WrappedMask.class::cast)
                 .ifPresent(wrappedMask -> wrappedMask.refresh(uuid));
-        Optional.ofNullable(mask.getFallbackMask())
+        Optional.of(mask.getFallbackMask())
                 .filter(WrappedMask.class::isInstance)
                 .map(WrappedMask.class::cast)
                 .ifPresent(wrappedMask -> wrappedMask.refresh(uuid));
     }
 
     @Override
-    public void handleSignal(UUID uuid, Signal signal) {
-        if (mask == null) return;
-        Optional.ofNullable(mask.getMask())
+    protected void handleSignal(PredicateMask mask, UUID uuid, Signal signal) {
+        Optional.of(mask.getMask())
                 .filter(WrappedMask.class::isInstance)
                 .map(WrappedMask.class::cast)
                 .ifPresent(wrappedMask -> wrappedMask.handleSignal(uuid, signal));
-        Optional.ofNullable(mask.getFallbackMask())
+        Optional.of(mask.getFallbackMask())
                 .filter(WrappedMask.class::isInstance)
                 .map(WrappedMask.class::cast)
                 .ifPresent(wrappedMask -> wrappedMask.handleSignal(uuid, signal));

@@ -2,7 +2,7 @@ package me.hsgamer.bettergui.maskedgui.api.mask;
 
 import me.hsgamer.bettergui.api.menu.MenuElement;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
-import me.hsgamer.hscore.bukkit.gui.mask.Mask;
+import me.hsgamer.hscore.minecraft.gui.mask.Mask;
 
 import java.util.UUID;
 

@@ -6,7 +6,7 @@ import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.signal.ChangePageSignal;
 import me.hsgamer.bettergui.maskedgui.signal.RefreshMaskSignal;
 import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
-import me.hsgamer.hscore.bukkit.gui.mask.impl.PaginatedMask;
+import me.hsgamer.hscore.minecraft.gui.mask.impl.PaginatedMask;
 
 import java.util.Map;
 import java.util.Optional;
@@ -18,12 +18,12 @@ public abstract class WrappedPaginatedMask<T extends PaginatedMask> extends Base
     protected WrappedPaginatedMask(MaskBuilder.Input input) {
         super(input);
         input.menu.getVariableManager().register(getName() + "_page", (original, uuid) -> {
-            if (mask == null) return null;
-            return Integer.toString(mask.getPage(uuid) + 1);
+            if (getMask() == null) return null;
+            return Integer.toString(getMask().getPage(uuid) + 1);
         });
         input.menu.getVariableManager().register(getName() + "_max", (original, uuid) -> {
-            if (mask == null) return null;
-            return Integer.toString(mask.getPageAmount(uuid));
+            if (getMask() == null) return null;
+            return Integer.toString(getMask().getPageAmount(uuid));
         });
     }
 
@@ -47,7 +47,7 @@ public abstract class WrappedPaginatedMask<T extends PaginatedMask> extends Base
     }
 
     @Override
-    public void handleSignal(UUID uuid, Signal signal) {
+    protected void handleSignal(T mask, UUID uuid, Signal signal) {
         signalHandler.handle(uuid, signal);
     }
 

@@ -5,7 +5,7 @@ import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.builder.ActionBuilder;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
-import me.hsgamer.hscore.task.BatchRunnable;
+import me.hsgamer.hscore.task.element.TaskProcess;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
@@ -22,7 +22,7 @@ public abstract class SignalAction extends BaseAction {
     protected abstract Signal createSignal(UUID uuid, String value);
 
     @Override
-    public void accept(UUID uuid, BatchRunnable.Process process) {
+    public void accept(UUID uuid, TaskProcess process) {
         String value = getReplacedString(uuid);
         Menu menu = getMenu();
         if (!(menu instanceof MaskedMenu)) {
@@ -35,10 +35,5 @@ public abstract class SignalAction extends BaseAction {
             maskedMenu.handleSignal(uuid, signal);
             process.next();
         });
-    }
-
-    @Override
-    protected boolean shouldBeTrimmed() {
-        return true;
     }
 }

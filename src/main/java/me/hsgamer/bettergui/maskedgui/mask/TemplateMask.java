@@ -59,17 +59,13 @@ public class TemplateMask extends BaseWrappedMask<WrappedMask> {
     }
 
     @Override
-    public void refresh(UUID uuid) {
-        if (mask != null) {
-            mask.refresh(uuid);
-        }
+    protected void refresh(WrappedMask mask, UUID uuid) {
+        mask.refresh(uuid);
     }
 
     @Override
-    public void handleSignal(UUID uuid, Signal signal) {
-        if (mask != null) {
-            mask.handleSignal(uuid, signal);
-        }
+    protected void handleSignal(WrappedMask mask, UUID uuid, Signal signal) {
+        mask.handleSignal(uuid, signal);
     }
 
     private Object replaceVariables(Object obj, Map<String, String> variableMap) {

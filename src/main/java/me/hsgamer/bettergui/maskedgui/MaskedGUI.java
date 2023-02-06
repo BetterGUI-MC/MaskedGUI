@@ -4,6 +4,7 @@ import me.hsgamer.bettergui.builder.ActionBuilder;
 import me.hsgamer.bettergui.builder.MenuBuilder;
 import me.hsgamer.bettergui.maskedgui.action.ChangePageAction;
 import me.hsgamer.bettergui.maskedgui.action.RefreshMaskAction;
+import me.hsgamer.bettergui.maskedgui.action.SetMaskAction;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.config.TemplateMaskConfig;
 import me.hsgamer.bettergui.maskedgui.mask.*;
@@ -25,6 +26,7 @@ public final class MaskedGUI extends PluginAddon {
         ActionBuilder.INSTANCE.register(input -> new ChangePageAction(getPlugin(), input, true), "next-page");
         ActionBuilder.INSTANCE.register(input -> new ChangePageAction(getPlugin(), input, false), "previous-page", "back-page");
         ActionBuilder.INSTANCE.register(input -> new RefreshMaskAction(getPlugin(), input), "refresh-mask");
+        ActionBuilder.INSTANCE.register(input -> new SetMaskAction(getPlugin(), input), "set-mask");
 
         MaskBuilder.INSTANCE.setDefaultMaskType("simple");
         MaskBuilder.INSTANCE.register(WrappedSimpleMask::new, "simple");
@@ -40,6 +42,7 @@ public final class MaskedGUI extends PluginAddon {
         MaskBuilder.INSTANCE.register(WrappedListMask::new, "list");
         MaskBuilder.INSTANCE.register(WrappedPredicateMask::new, "predicate", "requirement");
         MaskBuilder.INSTANCE.register(input -> new OneTimeAnimatedMask(this, input), "one-time-animated", "one-time-animate", "one-time-anim", "animated-one-time", "animate-one-time", "anim-one-time", "animated-once", "animate-once", "anim-once");
+        MaskBuilder.INSTANCE.register(SwitchMask::new, "switch");
 
         new SpigotVersionChecker(107475).getVersion().whenComplete((output, throwable) -> {
             if (throwable != null) {

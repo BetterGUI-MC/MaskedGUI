@@ -16,7 +16,7 @@ public class WrappedListMask extends BaseWrappedMask<ListMask> {
 
     @Override
     protected ListMask createMask(Map<String, Object> section) {
-        return new ListMask(getName()).addMask(MaskUtil.createChildMasks(this, section));
+        return new ListMask(getName()).addMask(MaskUtil.createChildMasksAsList(this, section));
     }
 
     @Override

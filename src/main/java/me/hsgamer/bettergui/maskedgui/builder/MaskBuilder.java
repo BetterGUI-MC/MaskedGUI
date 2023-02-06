@@ -3,9 +3,10 @@ package me.hsgamer.bettergui.maskedgui.builder;
 import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.hscore.builder.MassBuilder;
+import me.hsgamer.hscore.collections.map.CaseInsensitiveStringLinkedMap;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
 
-import java.util.List;
+import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -45,7 +46,7 @@ public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMas
         });
     }
 
-    public List<WrappedMask> getChildMasks(WrappedMask parentMask, Map<String, Object> section) {
+    public Map<String, WrappedMask> getChildMasksAsMap(WrappedMask parentMask, Map<String, Object> section) {
         return section.entrySet()
                 .stream()
                 .filter(entry -> entry.getValue() instanceof Map)
@@ -53,10 +54,16 @@ public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMas
                     // noinspection unchecked
                     Map<String, Object> value = (Map<String, Object>) entry.getValue();
                     String name = parentMask.getName() + "_child_" + entry.getKey();
-                    return new Input(parentMask.getMenu(), name, value);
+                    return new AbstractMap.SimpleEntry<>(entry.getKey(), new Input(parentMask.getMenu(), name, value));
                 })
-                .flatMap(input -> build(input).map(Stream::of).orElseGet(Stream::empty))
-                .collect(Collectors.toList());
+                .flatMap(entry -> {
+                    WrappedMask mask = build(entry.getValue()).orElse(null);
+                    if (mask == null) {
+                        return Stream.empty();
+                    }
+                    return Stream.of(new AbstractMap.SimpleEntry<>(entry.getKey(), mask));
+                })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b, CaseInsensitiveStringLinkedMap::new));
     }
 
     public static class Input {

@@ -98,7 +98,7 @@ public class OneTimeAnimatedMask implements WrappedMask {
 
     @Override
     public void init() {
-        masks.addAll(MaskUtil.createChildMasks(this, input.options));
+        masks.addAll(MaskUtil.createChildMasksAsList(this, input.options));
         update = Optional.ofNullable(input.options.get("update"))
                 .map(String::valueOf)
                 .flatMap(Validate::getNumber)

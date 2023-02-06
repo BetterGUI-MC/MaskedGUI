@@ -33,32 +33,36 @@ public final class MaskUtil {
         return createButtons(wrappedMask, buttonMap, wrappedMask.getName() + "_button_");
     }
 
-    public static void refreshButtons(UUID uuid, Collection<Button> buttons) {
+    public static void refreshButtons(UUID uuid, Collection<? extends Button> buttons) {
         buttons.stream()
                 .filter(WrappedButton.class::isInstance)
                 .map(WrappedButton.class::cast)
                 .forEach(button -> button.refresh(uuid));
     }
 
-    public static void refreshMasks(UUID uuid, Collection<Mask> masks) {
+    public static void refreshMasks(UUID uuid, Collection<? extends Mask> masks) {
         masks.stream()
                 .filter(WrappedMask.class::isInstance)
                 .map(WrappedMask.class::cast)
                 .forEach(mask -> mask.refresh(uuid));
     }
 
-    public static void handleSignal(UUID uuid, Collection<Mask> masks, Signal signal) {
+    public static void handleSignal(UUID uuid, Collection<? extends Mask> masks, Signal signal) {
         masks.stream()
                 .filter(WrappedMask.class::isInstance)
                 .map(WrappedMask.class::cast)
                 .forEach(mask -> mask.handleSignal(uuid, signal));
     }
 
-    public static List<WrappedMask> createChildMasks(WrappedMask mask, Map<String, Object> options) {
+    public static Map<String, WrappedMask> createChildMasks(WrappedMask mask, Map<String, Object> options) {
         return Optional.ofNullable(MapUtil.getIfFound(options, "masks", "child"))
                 .flatMap(MapUtil::castOptionalStringObjectMap)
-                .map(o -> MaskBuilder.INSTANCE.getChildMasks(mask, o))
-                .orElseGet(Collections::emptyList);
+                .map(o -> MaskBuilder.INSTANCE.getChildMasksAsMap(mask, o))
+                .orElseGet(Collections::emptyMap);
+    }
+
+    public static List<WrappedMask> createChildMasksAsList(WrappedMask mask, Map<String, Object> options) {
+        return new ArrayList<>(createChildMasks(mask, options).values());
     }
 
     public static Map<String, WrappedButton> createChildButtons(WrappedMask mask, Map<String, Object> options) {

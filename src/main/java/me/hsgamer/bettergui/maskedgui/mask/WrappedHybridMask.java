@@ -16,7 +16,7 @@ public class WrappedHybridMask extends BaseWrappedMask<HybridMask> {
 
     @Override
     protected HybridMask createMask(Map<String, Object> section) {
-        return new HybridMask(getName()).addMask(MaskUtil.createChildMasks(this, section));
+        return new HybridMask(getName()).addMask(MaskUtil.createChildMasksAsList(this, section));
     }
 
     @Override

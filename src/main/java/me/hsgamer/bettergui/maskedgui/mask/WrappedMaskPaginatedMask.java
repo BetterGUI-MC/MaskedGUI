@@ -15,7 +15,7 @@ public class WrappedMaskPaginatedMask extends WrappedPaginatedMask<StaticMaskPag
 
     @Override
     protected StaticMaskPaginatedMask createPaginatedMask(Map<String, Object> section) {
-        return new StaticMaskPaginatedMask(getName()).addMask(MaskUtil.createChildMasks(this, section));
+        return new StaticMaskPaginatedMask(getName()).addMask(MaskUtil.createChildMasksAsList(this, section));
     }
 
     @Override

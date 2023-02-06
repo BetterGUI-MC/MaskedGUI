@@ -28,7 +28,7 @@ public class WrappedAnimatedMask extends BaseWrappedMask<AnimatedMask> {
                 .map(BigDecimal::longValue)
                 .orElse(0L);
 
-        List<WrappedMask> frames = MaskUtil.createChildMasks(this, section);
+        List<WrappedMask> frames = MaskUtil.createChildMasksAsList(this, section);
         return new AnimatedMask(getName()).addMask(frames).setPeriodTicks(update);
     }
 

@@ -10,6 +10,7 @@ import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.PlaceholderMask;
+import me.hsgamer.hscore.ui.property.Initializable;
 
 import java.util.Collections;
 import java.util.Map;
@@ -28,7 +29,12 @@ public class SwitchMask extends BaseWrappedMask<PlaceholderMask> {
     protected PlaceholderMask createMask(Map<String, Object> section) {
         childMasks = MaskUtil.createChildMasks(this, section);
 
-        PlaceholderMask mask = new PlaceholderMask(getName());
+        PlaceholderMask mask = new PlaceholderMask(getName()) {
+            @Override
+            public boolean canView(UUID uuid) {
+                return Optional.ofNullable(getMask(uuid)).orElseGet(this::getDefaultMask).canView(uuid);
+            }
+        };
         Optional.ofNullable(MapUtil.getIfFound(section, "default", "default-mask"))
                 .map(String::valueOf)
                 .map(childMasks::get)
@@ -45,6 +51,18 @@ public class SwitchMask extends BaseWrappedMask<PlaceholderMask> {
                 .addHandler(RefreshMaskSignal.class, (uuid, refreshMaskSignal) -> mask.setMask(uuid, null));
 
         return mask;
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        childMasks.values().stream().filter(child -> child != getMask().getDefaultMask()).forEach(Initializable::init);
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        childMasks.values().stream().filter(child -> child != getMask().getDefaultMask()).forEach(Initializable::init);
     }
 
     @Override

@@ -29,12 +29,7 @@ public class SwitchMask extends BaseWrappedMask<PlaceholderMask> {
     protected PlaceholderMask createMask(Map<String, Object> section) {
         childMasks = MaskUtil.createChildMasks(this, section);
 
-        PlaceholderMask mask = new PlaceholderMask(getName()) {
-            @Override
-            public boolean canView(UUID uuid) {
-                return Optional.ofNullable(getMask(uuid)).orElseGet(this::getDefaultMask).canView(uuid);
-            }
-        };
+        PlaceholderMask mask = new PlaceholderMask(getName()).setInitDefaultMask(false);
         Optional.ofNullable(MapUtil.getIfFound(section, "default", "default-mask"))
                 .map(String::valueOf)
                 .map(childMasks::get)
@@ -56,13 +51,13 @@ public class SwitchMask extends BaseWrappedMask<PlaceholderMask> {
     @Override
     public void init() {
         super.init();
-        childMasks.values().stream().filter(child -> child != getMask().getDefaultMask()).forEach(Initializable::init);
+        childMasks.values().forEach(Initializable::init);
     }
 
     @Override
     public void stop() {
         super.stop();
-        childMasks.values().stream().filter(child -> child != getMask().getDefaultMask()).forEach(Initializable::init);
+        childMasks.values().forEach(Initializable::stop);
     }
 
     @Override

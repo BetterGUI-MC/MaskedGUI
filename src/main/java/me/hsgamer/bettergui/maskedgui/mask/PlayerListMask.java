@@ -89,9 +89,11 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
 
     private Button newButton(UUID uuid) {
         Map<String, Object> replaced = replace(templateButton, uuid);
-        return ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), getName() + "_" + uuid.toString(), replaced))
+        Button button = ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), getName() + "_" + uuid.toString(), replaced))
                 .map(Button.class::cast)
                 .orElse(Button.EMPTY);
+        button.init();
+        return button;
     }
 
     // TODO: Add requirements to check between players
@@ -115,5 +117,12 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
                 return getPlayerButtons(uuid);
             }
         };
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        buttonMap.values().forEach(Button::stop);
+        buttonMap.clear();
     }
 }

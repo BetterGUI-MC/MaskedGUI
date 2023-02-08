@@ -1,6 +1,7 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.builder.ButtonBuilder;
+import me.hsgamer.bettergui.maskedgui.MaskedGUI;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.bettergui.util.MapUtil;
@@ -10,14 +11,16 @@ import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
 import me.hsgamer.hscore.variable.VariableManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
+public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> implements Runnable {
     private static final Pattern pattern = Pattern.compile("\\{current_player(_(.+))?}");
 
     static {
@@ -45,10 +48,13 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
     }
 
     private final Map<UUID, Button> buttonMap = new ConcurrentHashMap<>();
+    private final MaskedGUI addon;
     private Map<String, Object> templateButton = Collections.emptyMap();
+    private BukkitTask updateTask;
 
-    public PlayerListMask(MaskBuilder.Input input) {
+    public PlayerListMask(MaskedGUI addon, MaskBuilder.Input input) {
         super(input);
+        this.addon = addon;
     }
 
     private static Object replaceShortcut(Object obj, UUID targetId) {
@@ -98,12 +104,12 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
 
     // TODO: Add requirements to check between players
     private List<Button> getPlayerButtons(UUID uuid) {
-        List<Button> list = new ArrayList<>();
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            Button button = buttonMap.computeIfAbsent(player.getUniqueId(), this::newButton);
-            list.add(button);
-        }
-        return list;
+        return Bukkit.getOnlinePlayers()
+                .stream()
+                .map(Player::getUniqueId)
+                .map(buttonMap::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -120,9 +126,25 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
     }
 
     @Override
+    public void init() {
+        super.init();
+        updateTask = Bukkit.getScheduler().runTaskTimerAsynchronously(addon.getPlugin(), this, 0L, 20L);
+    }
+
+    @Override
     public void stop() {
         super.stop();
+        if (updateTask != null) {
+            updateTask.cancel();
+        }
         buttonMap.values().forEach(Button::stop);
         buttonMap.clear();
+    }
+
+    @Override
+    public void run() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            buttonMap.computeIfAbsent(player.getUniqueId(), this::newButton);
+        }
     }
 }

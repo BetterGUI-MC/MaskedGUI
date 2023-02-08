@@ -43,6 +43,7 @@ public final class MaskedGUI extends PluginAddon {
         MaskBuilder.INSTANCE.register(WrappedPredicateMask::new, "predicate", "requirement");
         MaskBuilder.INSTANCE.register(input -> new OneTimeAnimatedMask(this, input), "one-time-animated", "one-time-animate", "one-time-anim", "animated-one-time", "animate-one-time", "anim-one-time", "animated-once", "animate-once", "anim-once");
         MaskBuilder.INSTANCE.register(SwitchMask::new, "switch");
+        MaskBuilder.INSTANCE.register(PlayerListMask::new, "player-list", "playerlist", "players");
 
         new SpigotVersionChecker(107475).getVersion().whenComplete((output, throwable) -> {
             if (throwable != null) {

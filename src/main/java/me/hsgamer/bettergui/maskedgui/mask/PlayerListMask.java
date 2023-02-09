@@ -51,6 +51,7 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
     private final MaskedGUI addon;
     private Map<String, Object> templateButton = Collections.emptyMap();
     private BukkitTask updateTask;
+    private boolean viewSelf = true;
 
     public PlayerListMask(MaskedGUI addon, MaskBuilder.Input input) {
         super(input);
@@ -93,6 +94,15 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         return newMap;
     }
 
+    private boolean canView(UUID uuid, UUID targetId) {
+        if (viewSelf && !uuid.equals(targetId)) {
+            return false;
+        }
+
+        // TODO: Add requirements to check between players
+        return false;
+    }
+
     private Button newButton(UUID uuid) {
         Map<String, Object> replaced = replace(templateButton, uuid);
         Button button = ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), getName() + "_" + uuid.toString(), replaced))
@@ -102,11 +112,11 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         return button;
     }
 
-    // TODO: Add requirements to check between players
     private List<Button> getPlayerButtons(UUID uuid) {
         return Bukkit.getOnlinePlayers()
                 .stream()
                 .map(Player::getUniqueId)
+                .filter(targetId -> canView(uuid, targetId))
                 .map(buttonMap::get)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
@@ -117,6 +127,10 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         templateButton = Optional.ofNullable(MapUtil.getIfFound(section, "template", "button"))
                 .flatMap(MapUtil::castOptionalStringObjectMap)
                 .orElse(Collections.emptyMap());
+        viewSelf = Optional.ofNullable(MapUtil.getIfFound(section, "view-self", "self"))
+                .map(String::valueOf)
+                .map(Boolean::parseBoolean)
+                .orElse(true);
         return new ButtonPaginatedMask(getName(), MultiSlotUtil.getSlots(section)) {
             @Override
             public @NotNull List<@NotNull Button> getButtons(@NotNull UUID uuid) {

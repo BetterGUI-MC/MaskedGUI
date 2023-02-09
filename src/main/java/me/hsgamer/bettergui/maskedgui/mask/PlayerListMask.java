@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> implements Runnable {
-    private static final Pattern pattern = Pattern.compile("\\{current_player(_(.+))?}");
+    private static final Pattern pattern = Pattern.compile("\\{current_player(_([^{}]+))?}");
 
     static {
         VariableManager.register("current_", (original, uuid) -> {

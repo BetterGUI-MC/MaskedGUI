@@ -183,8 +183,8 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
                 if (currentEntry == null) {
                     currentEntry = newPlayerEntry(currentId);
                 }
-                currentEntry.activated.set(playerCondition == null || playerCondition.check(currentId).isSuccess);
-                return newPlayerEntry(currentId);
+                currentEntry.activated.lazySet(playerCondition == null || playerCondition.check(currentId).isSuccess);
+                return currentEntry;
             });
         }
     }

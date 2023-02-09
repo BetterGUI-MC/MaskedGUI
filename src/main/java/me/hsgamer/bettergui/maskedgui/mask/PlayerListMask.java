@@ -183,11 +183,7 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
                 if (currentEntry == null) {
                     currentEntry = newPlayerEntry(currentId);
                 }
-                if (playerCondition == null) {
-                    currentEntry.activated.set(true);
-                } else {
-                    currentEntry.activated.set(playerCondition.check(currentId).isSuccess);
-                }
+                currentEntry.activated.set(playerCondition == null || playerCondition.check(currentId).isSuccess);
                 return newPlayerEntry(currentId);
             });
         }
@@ -197,7 +193,7 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         final UUID uuid;
         final Button button;
         final Predicate<UUID> viewerCondition;
-        final AtomicBoolean activated = new AtomicBoolean(true);
+        final AtomicBoolean activated = new AtomicBoolean();
 
         private PlayerEntry(UUID uuid, Button button, Predicate<UUID> viewerCondition) {
             this.uuid = uuid;

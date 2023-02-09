@@ -1,11 +1,14 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.builder.ButtonBuilder;
+import me.hsgamer.bettergui.builder.RequirementBuilder;
 import me.hsgamer.bettergui.maskedgui.MaskedGUI;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
+import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
+import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
 import me.hsgamer.hscore.variable.VariableManager;
@@ -16,6 +19,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -47,9 +52,10 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         });
     }
 
-    private final Map<UUID, Button> buttonMap = new ConcurrentHashMap<>();
+    private final Map<UUID, PlayerEntry> playerEntryMap = new ConcurrentHashMap<>();
     private final MaskedGUI addon;
     private Map<String, Object> templateButton = Collections.emptyMap();
+    private List<String> playerConditions = Collections.emptyList();
     private BukkitTask updateTask;
     private boolean viewSelf = true;
 
@@ -58,25 +64,28 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         this.addon = addon;
     }
 
+    private static String replaceShortcut(String string, UUID targetId) {
+        Matcher matcher = pattern.matcher(string);
+        while (matcher.find()) {
+            String variable = matcher.group(2);
+            String replacement;
+            if (variable == null) {
+                replacement = "{current_" + targetId.toString() + ";player}";
+            } else {
+                boolean isPAPI = variable.startsWith("papi_");
+                if (isPAPI) {
+                    variable = variable.substring(5);
+                }
+                replacement = "{current_" + targetId.toString() + ";" + variable + ";" + isPAPI + "}";
+            }
+            string = string.replace(matcher.group(), replacement);
+        }
+        return string;
+    }
+
     private static Object replaceShortcut(Object obj, UUID targetId) {
         if (obj instanceof String) {
-            String string = (String) obj;
-            Matcher matcher = pattern.matcher(string);
-            while (matcher.find()) {
-                String variable = matcher.group(2);
-                String replacement;
-                if (variable == null) {
-                    replacement = "{current_" + targetId.toString() + ";player}";
-                } else {
-                    boolean isPAPI = variable.startsWith("papi_");
-                    if (isPAPI) {
-                        variable = variable.substring(5);
-                    }
-                    replacement = "{current_" + targetId.toString() + ";" + variable + ";" + isPAPI + "}";
-                }
-                string = string.replace(matcher.group(), replacement);
-            }
-            return string;
+            return replaceShortcut((String) obj, targetId);
         } else if (obj instanceof Collection) {
             List<Object> replaceList = new ArrayList<>();
             ((Collection<?>) obj).forEach(o -> replaceList.add(replaceShortcut(o, targetId)));
@@ -88,37 +97,52 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         return obj;
     }
 
-    private static Map<String, Object> replace(Map<String, Object> map, UUID targetId) {
+    private static Map<String, Object> replaceShortcut(Map<String, Object> map, UUID targetId) {
         Map<String, Object> newMap = new LinkedHashMap<>();
         map.forEach((k, v) -> newMap.put(k, replaceShortcut(v, targetId)));
         return newMap;
     }
 
-    private boolean canView(UUID uuid, UUID targetId) {
-        if (viewSelf && !uuid.equals(targetId)) {
-            return false;
-        }
-
-        // TODO: Add requirements to check between players
-        return false;
+    private static List<String> replaceShortcut(List<String> list, UUID targetId) {
+        List<String> newList = new ArrayList<>();
+        list.forEach(s -> newList.add(replaceShortcut(s, targetId)));
+        return newList;
     }
 
-    private Button newButton(UUID uuid) {
-        Map<String, Object> replaced = replace(templateButton, uuid);
-        Button button = ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), getName() + "_" + uuid.toString(), replaced))
+    private boolean canView(UUID uuid, PlayerEntry targetPlayerEntry) {
+        if (!viewSelf && uuid.equals(targetPlayerEntry.uuid)) {
+            return false;
+        }
+        if (!targetPlayerEntry.playerCondition.getAsBoolean()) {
+            return false;
+        }
+        return targetPlayerEntry.viewerCondition.test(uuid);
+    }
+
+    private PlayerEntry newPlayerEntry(UUID uuid) {
+        Map<String, Object> replacedButtonSettings = replaceShortcut(templateButton, uuid);
+        Button button = ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), getName() + "_player_" + uuid + "_button", replacedButtonSettings))
                 .map(Button.class::cast)
                 .orElse(Button.EMPTY);
         button.init();
-        return button;
+
+        List<String> replacedConditions = replaceShortcut(playerConditions, uuid);
+        ConditionRequirement requirement = new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", getName() + "_player_" + uuid + "_condition", replacedConditions));
+        BooleanSupplier condition = () -> requirement.check(uuid).isSuccess;
+
+        // TODO: Add viewer condition
+
+        return new PlayerEntry(uuid, button, condition, uuid1 -> true);
     }
 
     private List<Button> getPlayerButtons(UUID uuid) {
         return Bukkit.getOnlinePlayers()
                 .stream()
                 .map(Player::getUniqueId)
-                .filter(targetId -> canView(uuid, targetId))
-                .map(buttonMap::get)
+                .map(playerEntryMap::get)
                 .filter(Objects::nonNull)
+                .filter(entry -> canView(uuid, entry))
+                .map(entry -> entry.button)
                 .collect(Collectors.toList());
     }
 
@@ -131,6 +155,9 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
                 .map(String::valueOf)
                 .map(Boolean::parseBoolean)
                 .orElse(true);
+        playerConditions = Optional.ofNullable(MapUtil.getIfFound(section, "player-condition"))
+                .map(CollectionUtils::createStringListFromObject)
+                .orElse(Collections.emptyList());
         return new ButtonPaginatedMask(getName(), MultiSlotUtil.getSlots(section)) {
             @Override
             public @NotNull List<@NotNull Button> getButtons(@NotNull UUID uuid) {
@@ -151,14 +178,28 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         if (updateTask != null) {
             updateTask.cancel();
         }
-        buttonMap.values().forEach(Button::stop);
-        buttonMap.clear();
+        playerEntryMap.values().forEach(playerEntry -> playerEntry.button.stop());
+        playerEntryMap.clear();
     }
 
     @Override
     public void run() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            buttonMap.computeIfAbsent(player.getUniqueId(), this::newButton);
+            playerEntryMap.computeIfAbsent(player.getUniqueId(), this::newPlayerEntry);
+        }
+    }
+
+    private static class PlayerEntry {
+        final UUID uuid;
+        final Button button;
+        final BooleanSupplier playerCondition;
+        final Predicate<UUID> viewerCondition;
+
+        private PlayerEntry(UUID uuid, Button button, BooleanSupplier playerCondition, Predicate<UUID> viewerCondition) {
+            this.uuid = uuid;
+            this.button = button;
+            this.playerCondition = playerCondition;
+            this.viewerCondition = viewerCondition;
         }
     }
 }

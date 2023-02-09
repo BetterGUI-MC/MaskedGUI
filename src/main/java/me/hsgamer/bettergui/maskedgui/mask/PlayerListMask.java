@@ -8,7 +8,6 @@ import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
-import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
 import me.hsgamer.hscore.variable.VariableManager;
@@ -19,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BooleanSupplier;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,7 +54,7 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
     private final Map<UUID, PlayerEntry> playerEntryMap = new ConcurrentHashMap<>();
     private final MaskedGUI addon;
     private Map<String, Object> templateButton = Collections.emptyMap();
-    private List<String> playerConditions = Collections.emptyList();
+    private ConditionRequirement playerCondition;
     private BukkitTask updateTask;
     private boolean viewSelf = true;
 
@@ -113,7 +112,7 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         if (!viewSelf && uuid.equals(targetPlayerEntry.uuid)) {
             return false;
         }
-        if (!targetPlayerEntry.playerCondition.getAsBoolean()) {
+        if (!targetPlayerEntry.activated.get()) {
             return false;
         }
         return targetPlayerEntry.viewerCondition.test(uuid);
@@ -126,13 +125,8 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
                 .orElse(Button.EMPTY);
         button.init();
 
-        List<String> replacedConditions = replaceShortcut(playerConditions, uuid);
-        ConditionRequirement requirement = new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", getName() + "_player_" + uuid + "_condition", replacedConditions));
-        BooleanSupplier condition = () -> requirement.check(uuid).isSuccess;
-
         // TODO: Add viewer condition
-
-        return new PlayerEntry(uuid, button, condition, uuid1 -> true);
+        return new PlayerEntry(uuid, button, uuid1 -> true);
     }
 
     private List<Button> getPlayerButtons(UUID uuid) {
@@ -155,9 +149,9 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
                 .map(String::valueOf)
                 .map(Boolean::parseBoolean)
                 .orElse(true);
-        playerConditions = Optional.ofNullable(MapUtil.getIfFound(section, "player-condition"))
-                .map(CollectionUtils::createStringListFromObject)
-                .orElse(Collections.emptyList());
+        playerCondition = Optional.ofNullable(MapUtil.getIfFound(section, "player-condition"))
+                .map(o -> new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", getName() + "_player_condition", o)))
+                .orElse(null);
         return new ButtonPaginatedMask(getName(), MultiSlotUtil.getSlots(section)) {
             @Override
             public @NotNull List<@NotNull Button> getButtons(@NotNull UUID uuid) {
@@ -185,20 +179,29 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
     @Override
     public void run() {
         for (Player player : Bukkit.getOnlinePlayers()) {
-            playerEntryMap.computeIfAbsent(player.getUniqueId(), this::newPlayerEntry);
+            playerEntryMap.compute(player.getUniqueId(), (currentId, currentEntry) -> {
+                if (currentEntry == null) {
+                    currentEntry = newPlayerEntry(currentId);
+                }
+                if (playerCondition == null) {
+                    currentEntry.activated.set(true);
+                } else {
+                    currentEntry.activated.set(playerCondition.check(currentId).isSuccess);
+                }
+                return newPlayerEntry(currentId);
+            });
         }
     }
 
     private static class PlayerEntry {
         final UUID uuid;
         final Button button;
-        final BooleanSupplier playerCondition;
         final Predicate<UUID> viewerCondition;
+        final AtomicBoolean activated = new AtomicBoolean(true);
 
-        private PlayerEntry(UUID uuid, Button button, BooleanSupplier playerCondition, Predicate<UUID> viewerCondition) {
+        private PlayerEntry(UUID uuid, Button button, Predicate<UUID> viewerCondition) {
             this.uuid = uuid;
             this.button = button;
-            this.playerCondition = playerCondition;
             this.viewerCondition = viewerCondition;
         }
     }

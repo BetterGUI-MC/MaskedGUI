@@ -8,6 +8,7 @@ import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
+import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
 import me.hsgamer.hscore.variable.VariableManager;
@@ -55,6 +56,7 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
     private final MaskedGUI addon;
     private Map<String, Object> templateButton = Collections.emptyMap();
     private ConditionRequirement playerCondition;
+    private List<String> viewerConditionTemplate = Collections.emptyList();
     private BukkitTask updateTask;
     private boolean viewSelf = true;
 
@@ -125,8 +127,9 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
                 .orElse(Button.EMPTY);
         button.init();
 
-        // TODO: Add viewer condition
-        return new PlayerEntry(uuid, button, uuid1 -> true);
+        List<String> replacedViewerConditions = replaceShortcut(viewerConditionTemplate, uuid);
+        ConditionRequirement viewerCondition = new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", getName() + "_player_" + uuid + "_condition", replacedViewerConditions));
+        return new PlayerEntry(uuid, button, uuid1 -> viewerCondition.check(uuid1).isSuccess);
     }
 
     private List<Button> getPlayerButtons(UUID uuid) {
@@ -152,6 +155,9 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         playerCondition = Optional.ofNullable(MapUtil.getIfFound(section, "player-condition"))
                 .map(o -> new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", getName() + "_player_condition", o)))
                 .orElse(null);
+        viewerConditionTemplate = Optional.ofNullable(MapUtil.getIfFound(section, "viewer-condition"))
+                .map(CollectionUtils::createStringListFromObject)
+                .orElse(Collections.emptyList());
         return new ButtonPaginatedMask(getName(), MultiSlotUtil.getSlots(section)) {
             @Override
             public @NotNull List<@NotNull Button> getButtons(@NotNull UUID uuid) {

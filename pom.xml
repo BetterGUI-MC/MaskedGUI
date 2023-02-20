@@ -7,7 +7,7 @@
     <parent>
         <groupId>me.hsgamer.bettergui</groupId>
         <artifactId>addon-parent</artifactId>
-        <version>2.0</version>
+        <version>2.1</version>
     </parent>
 
     <artifactId>MaskedGUI</artifactId>

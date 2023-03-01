@@ -74,7 +74,7 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
             } else {
                 finalVariable = "{" + variable + "}";
             }
-            return StringReplacerApplier.replace(finalVariable, targetId, true);
+            return StringReplacerApplier.replace(finalVariable, targetId, this);
         });
     }
 

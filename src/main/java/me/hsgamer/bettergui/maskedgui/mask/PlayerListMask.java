@@ -26,7 +26,6 @@ import me.hsgamer.bettergui.util.StringReplacerApplier;
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
-import me.hsgamer.hscore.variable.VariableManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -43,8 +42,20 @@ import java.util.stream.Collectors;
 public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> implements Runnable {
     private static final Pattern pattern = Pattern.compile("\\{current_player(_([^{}]+))?}");
 
-    static {
-        VariableManager.register("current_", (original, uuid) -> {
+    private final Map<UUID, PlayerEntry> playerEntryMap = new ConcurrentHashMap<>();
+    private final MaskedGUI addon;
+    private final String variablePrefix;
+    private Map<String, Object> templateButton = Collections.emptyMap();
+    private ConditionRequirement playerCondition;
+    private List<String> viewerConditionTemplate = Collections.emptyList();
+    private BukkitTask updateTask;
+    private boolean viewSelf = true;
+
+    public PlayerListMask(MaskedGUI addon, MaskBuilder.Input input) {
+        super(input);
+        this.addon = addon;
+        this.variablePrefix = getName() + "_current_";
+        input.menu.getVariableManager().register(variablePrefix, (original, uuid) -> {
             String[] split = original.split(";", 3);
             if (split.length < 2) {
                 return null;
@@ -67,39 +78,26 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         });
     }
 
-    private final Map<UUID, PlayerEntry> playerEntryMap = new ConcurrentHashMap<>();
-    private final MaskedGUI addon;
-    private Map<String, Object> templateButton = Collections.emptyMap();
-    private ConditionRequirement playerCondition;
-    private List<String> viewerConditionTemplate = Collections.emptyList();
-    private BukkitTask updateTask;
-    private boolean viewSelf = true;
-
-    public PlayerListMask(MaskedGUI addon, MaskBuilder.Input input) {
-        super(input);
-        this.addon = addon;
-    }
-
-    private static String replaceShortcut(String string, UUID targetId) {
+    private String replaceShortcut(String string, UUID targetId) {
         Matcher matcher = pattern.matcher(string);
         while (matcher.find()) {
             String variable = matcher.group(2);
             String replacement;
             if (variable == null) {
-                replacement = "{current_" + targetId.toString() + ";player}";
+                replacement = "{" + variablePrefix + targetId.toString() + ";player}";
             } else {
                 boolean isPAPI = variable.startsWith("papi_");
                 if (isPAPI) {
                     variable = variable.substring(5);
                 }
-                replacement = "{current_" + targetId.toString() + ";" + variable + ";" + isPAPI + "}";
+                replacement = "{" + variablePrefix + targetId.toString() + ";" + variable + ";" + isPAPI + "}";
             }
             string = string.replace(matcher.group(), replacement);
         }
         return string;
     }
 
-    private static Object replaceShortcut(Object obj, UUID targetId) {
+    private Object replaceShortcut(Object obj, UUID targetId) {
         if (obj instanceof String) {
             return replaceShortcut((String) obj, targetId);
         } else if (obj instanceof Collection) {
@@ -113,13 +111,13 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         return obj;
     }
 
-    private static Map<String, Object> replaceShortcut(Map<String, Object> map, UUID targetId) {
+    private Map<String, Object> replaceShortcut(Map<String, Object> map, UUID targetId) {
         Map<String, Object> newMap = new LinkedHashMap<>();
         map.forEach((k, v) -> newMap.put(k, replaceShortcut(v, targetId)));
         return newMap;
     }
 
-    private static List<String> replaceShortcut(List<String> list, UUID targetId) {
+    private List<String> replaceShortcut(List<String> list, UUID targetId) {
         List<String> newList = new ArrayList<>();
         list.forEach(s -> newList.add(replaceShortcut(s, targetId)));
         return newList;

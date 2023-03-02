@@ -80,6 +80,13 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         });
     }
 
+    protected Stream<? extends OfflinePlayer> getPlayerStream() {
+        if (viewOffline) {
+            return Arrays.stream(Bukkit.getOfflinePlayers());
+        }
+        return Bukkit.getOnlinePlayers().stream();
+    }
+
     private String replaceShortcut(String string, UUID targetId) {
         Matcher matcher = pattern.matcher(string);
         while (matcher.find()) {
@@ -97,13 +104,6 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
             string = string.replace(matcher.group(), replacement);
         }
         return string;
-    }
-
-    private Stream<? extends OfflinePlayer> getPlayerStream() {
-        if (viewOffline) {
-            return Arrays.stream(Bukkit.getOfflinePlayers());
-        }
-        return Bukkit.getOnlinePlayers().stream();
     }
 
     private Object replaceShortcut(Object obj, UUID targetId) {

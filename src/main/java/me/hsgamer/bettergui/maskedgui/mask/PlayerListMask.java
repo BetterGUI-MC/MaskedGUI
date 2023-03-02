@@ -27,7 +27,7 @@ import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,6 +38,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> implements Runnable {
     private static final Pattern pattern = Pattern.compile("\\{current_player(_([^{}]+))?}");
@@ -50,6 +51,7 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
     private List<String> viewerConditionTemplate = Collections.emptyList();
     private BukkitTask updateTask;
     private boolean viewSelf = true;
+    private boolean viewOffline = true;
 
     public PlayerListMask(MaskedGUI addon, MaskBuilder.Input input) {
         super(input);
@@ -95,6 +97,13 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
             string = string.replace(matcher.group(), replacement);
         }
         return string;
+    }
+
+    private Stream<? extends OfflinePlayer> getPlayerStream() {
+        if (viewOffline) {
+            return Arrays.stream(Bukkit.getOfflinePlayers());
+        }
+        return Bukkit.getOnlinePlayers().stream();
     }
 
     private Object replaceShortcut(Object obj, UUID targetId) {
@@ -146,9 +155,8 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
     }
 
     private List<Button> getPlayerButtons(UUID uuid) {
-        return Bukkit.getOnlinePlayers()
-                .stream()
-                .map(Player::getUniqueId)
+        return getPlayerStream()
+                .map(OfflinePlayer::getUniqueId)
                 .map(playerEntryMap::get)
                 .filter(Objects::nonNull)
                 .filter(entry -> canView(uuid, entry))
@@ -165,6 +173,10 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
                 .map(String::valueOf)
                 .map(Boolean::parseBoolean)
                 .orElse(true);
+        viewOffline = Optional.ofNullable(MapUtil.getIfFound(section, "view-offline", "offline"))
+                .map(String::valueOf)
+                .map(Boolean::parseBoolean)
+                .orElse(false);
         playerCondition = Optional.ofNullable(MapUtil.getIfFound(section, "player-condition"))
                 .map(o -> new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", getName() + "_player_condition", o)))
                 .orElse(null);
@@ -197,15 +209,13 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
 
     @Override
     public void run() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            playerEntryMap.compute(player.getUniqueId(), (currentId, currentEntry) -> {
-                if (currentEntry == null) {
-                    currentEntry = newPlayerEntry(currentId);
-                }
-                currentEntry.activated.lazySet(playerCondition == null || playerCondition.check(currentId).isSuccess);
-                return currentEntry;
-            });
-        }
+        getPlayerStream().forEach(player -> playerEntryMap.compute(player.getUniqueId(), (currentId, currentEntry) -> {
+            if (currentEntry == null) {
+                currentEntry = newPlayerEntry(currentId);
+            }
+            currentEntry.activated.lazySet(playerCondition == null || playerCondition.check(currentId).isSuccess);
+            return currentEntry;
+        }));
     }
 
     private static class PlayerEntry {

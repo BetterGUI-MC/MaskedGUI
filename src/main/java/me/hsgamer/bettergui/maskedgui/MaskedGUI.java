@@ -17,9 +17,10 @@ package me.hsgamer.bettergui.maskedgui;
 
 import me.hsgamer.bettergui.builder.ActionBuilder;
 import me.hsgamer.bettergui.builder.MenuBuilder;
-import me.hsgamer.bettergui.maskedgui.action.ChangePageAction;
+import me.hsgamer.bettergui.maskedgui.action.NextPageAction;
 import me.hsgamer.bettergui.maskedgui.action.RefreshMaskAction;
 import me.hsgamer.bettergui.maskedgui.action.SetMaskAction;
+import me.hsgamer.bettergui.maskedgui.action.SetPageAction;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.config.TemplateMaskConfig;
 import me.hsgamer.bettergui.maskedgui.mask.*;
@@ -38,8 +39,9 @@ public final class MaskedGUI extends PluginAddon {
 
         MenuBuilder.INSTANCE.register(MaskedMenu::new, "masked");
 
-        ActionBuilder.INSTANCE.register(input -> new ChangePageAction(getPlugin(), input, true), "next-page");
-        ActionBuilder.INSTANCE.register(input -> new ChangePageAction(getPlugin(), input, false), "previous-page", "back-page");
+        ActionBuilder.INSTANCE.register(input -> new NextPageAction(getPlugin(), input, true), "next-page");
+        ActionBuilder.INSTANCE.register(input -> new NextPageAction(getPlugin(), input, false), "previous-page", "back-page");
+        ActionBuilder.INSTANCE.register(input -> new SetPageAction(getPlugin(), input), "set-page", "page");
         ActionBuilder.INSTANCE.register(input -> new RefreshMaskAction(getPlugin(), input), "refresh-mask");
         ActionBuilder.INSTANCE.register(input -> new SetMaskAction(getPlugin(), input), "set-mask");
 

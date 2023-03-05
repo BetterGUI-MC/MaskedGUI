@@ -13,20 +13,25 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package me.hsgamer.bettergui.maskedgui.signal;
+package me.hsgamer.bettergui.maskedgui.action;
 
-import me.hsgamer.bettergui.api.menu.Menu;
-import me.hsgamer.bettergui.maskedgui.api.signal.BaseSignal;
+import me.hsgamer.bettergui.builder.ActionBuilder;
+import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
+import me.hsgamer.bettergui.maskedgui.signal.NextPageSignal;
+import org.bukkit.plugin.Plugin;
 
-public class ChangePageSignal extends BaseSignal {
+import java.util.UUID;
+
+public class NextPageAction extends SignalAction {
     private final boolean next;
 
-    public ChangePageSignal(String name, Menu menu, boolean next) {
-        super(name, menu);
+    public NextPageAction(Plugin plugin, ActionBuilder.Input input, boolean next) {
+        super(plugin, input);
         this.next = next;
     }
 
-    public boolean isNext() {
-        return next;
+    @Override
+    protected Signal createSignal(UUID uuid, String value) {
+        return new NextPageSignal(value, getMenu(), next);
     }
 }

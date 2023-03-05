@@ -18,7 +18,7 @@ package me.hsgamer.bettergui.maskedgui.mask;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.signal.ChangePageSignal;
+import me.hsgamer.bettergui.maskedgui.signal.NextPageSignal;
 import me.hsgamer.bettergui.maskedgui.signal.RefreshMaskSignal;
 import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.PaginatedMask;
@@ -50,7 +50,7 @@ public abstract class WrappedPaginatedMask<T extends PaginatedMask> extends Base
         Optional.ofNullable(section.get("cycle")).map(Object::toString).map(Boolean::parseBoolean).ifPresent(mask::setCycle);
         signalHandler
                 .setSignal(section, getName())
-                .addHandler(ChangePageSignal.class, (uuid, changePageSignal) -> {
+                .addHandler(NextPageSignal.class, (uuid, changePageSignal) -> {
                     if (changePageSignal.isNext()) {
                         mask.nextPage(uuid);
                     } else {

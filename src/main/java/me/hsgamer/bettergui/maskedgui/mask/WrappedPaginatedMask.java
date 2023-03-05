@@ -20,6 +20,7 @@ import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.signal.NextPageSignal;
 import me.hsgamer.bettergui.maskedgui.signal.RefreshMaskSignal;
+import me.hsgamer.bettergui.maskedgui.signal.SetPageSignal;
 import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.PaginatedMask;
 
@@ -57,7 +58,8 @@ public abstract class WrappedPaginatedMask<T extends PaginatedMask> extends Base
                         mask.previousPage(uuid);
                     }
                 })
-                .addHandler(RefreshMaskSignal.class, (uuid, refreshMaskSignal) -> mask.setPage(uuid, 0));
+                .addHandler(RefreshMaskSignal.class, (uuid, refreshMaskSignal) -> mask.setPage(uuid, 0))
+                .addHandler(SetPageSignal.class, (uuid, setPageSignal) -> mask.setPage(uuid, setPageSignal.getPage()));
         return mask;
     }
 

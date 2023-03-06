@@ -24,6 +24,7 @@ import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
 import me.hsgamer.hscore.common.CollectionUtils;
+import me.hsgamer.hscore.minecraft.gui.GUIProperties;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
 import org.bukkit.Bukkit;
@@ -40,10 +41,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> implements Runnable {
+public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
     private static final Pattern pattern = Pattern.compile("\\{current_player(_([^{}]+))?}");
 
     private final Map<UUID, PlayerEntry> playerEntryMap = new ConcurrentHashMap<>();
+    private final Map<UUID, PlayerListCache> playerListCacheMap = new ConcurrentHashMap<>();
     private final MaskedGUI addon;
     private final String variablePrefix;
     private Map<String, Object> templateButton = Collections.emptyMap();
@@ -52,6 +54,8 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
     private BukkitTask updateTask;
     private boolean viewSelf = true;
     private boolean viewOffline = true;
+    private long playerUpdateTicks = 20L;
+    private long viewerUpdateMillis = 50L;
 
     public PlayerListMask(MaskedGUI addon, MaskBuilder.Input input) {
         super(input);
@@ -155,13 +159,25 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
     }
 
     private List<Button> getPlayerButtons(UUID uuid) {
-        return getPlayerStream()
-                .map(OfflinePlayer::getUniqueId)
-                .map(playerEntryMap::get)
-                .filter(Objects::nonNull)
-                .filter(entry -> canView(uuid, entry))
-                .map(entry -> entry.button)
-                .collect(Collectors.toList());
+        return playerListCacheMap.compute(uuid, (u, cache) -> {
+            long now = System.currentTimeMillis();
+            if (cache != null) {
+                long remaining = cache.lastUpdate - now;
+                if (remaining > viewerUpdateMillis) {
+                    return cache;
+                }
+            }
+            return new PlayerListCache(
+                    now,
+                    getPlayerStream()
+                            .map(OfflinePlayer::getUniqueId)
+                            .map(playerEntryMap::get)
+                            .filter(Objects::nonNull)
+                            .filter(entry -> canView(uuid, entry))
+                            .map(entry -> entry.button)
+                            .collect(Collectors.toList())
+            );
+        }).buttonList;
     }
 
     @Override
@@ -183,6 +199,16 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         viewerConditionTemplate = Optional.ofNullable(MapUtil.getIfFound(section, "viewer-condition"))
                 .map(CollectionUtils::createStringListFromObject)
                 .orElse(Collections.emptyList());
+        playerUpdateTicks = Optional.ofNullable(MapUtil.getIfFound(section, "player-update-ticks", "player-update"))
+                .map(String::valueOf)
+                .map(Long::parseLong)
+                .orElse(20L);
+        viewerUpdateMillis = Optional.ofNullable(MapUtil.getIfFound(section, "viewer-update-ticks", "viewer-update"))
+                .map(String::valueOf)
+                .map(Long::parseLong)
+                .map(ticks -> Math.max(ticks, 1) * GUIProperties.getMillisPerTick())
+                .map(millis -> Math.min(millis, 1L))
+                .orElse(50L);
         return new ButtonPaginatedMask(getName(), MultiSlotUtil.getSlots(section)) {
             @Override
             public @NotNull List<@NotNull Button> getButtons(@NotNull UUID uuid) {
@@ -194,7 +220,7 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
     @Override
     public void init() {
         super.init();
-        updateTask = Bukkit.getScheduler().runTaskTimerAsynchronously(addon.getPlugin(), this, 0L, 20L);
+        updateTask = Bukkit.getScheduler().runTaskTimerAsynchronously(addon.getPlugin(), this::updatePlayerList, 0L, playerUpdateTicks);
     }
 
     @Override
@@ -207,8 +233,7 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
         playerEntryMap.clear();
     }
 
-    @Override
-    public void run() {
+    private void updatePlayerList() {
         getPlayerStream().forEach(player -> playerEntryMap.compute(player.getUniqueId(), (currentId, currentEntry) -> {
             if (currentEntry == null) {
                 currentEntry = newPlayerEntry(currentId);
@@ -228,6 +253,16 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> im
             this.uuid = uuid;
             this.button = button;
             this.viewerCondition = viewerCondition;
+        }
+    }
+
+    private static class PlayerListCache {
+        final long lastUpdate;
+        final List<Button> buttonList;
+
+        private PlayerListCache(long lastUpdate, List<Button> buttonList) {
+            this.lastUpdate = lastUpdate;
+            this.buttonList = buttonList;
         }
     }
 }

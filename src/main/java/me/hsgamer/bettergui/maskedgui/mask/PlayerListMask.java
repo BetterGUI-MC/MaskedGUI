@@ -207,7 +207,7 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
                 .map(String::valueOf)
                 .map(Long::parseLong)
                 .map(ticks -> Math.max(ticks, 1) * GUIProperties.getMillisPerTick())
-                .map(millis -> Math.min(millis, 1L))
+                .map(millis -> Math.max(millis, 1L))
                 .orElse(50L);
         return new ButtonPaginatedMask(getName(), MultiSlotUtil.getSlots(section)) {
             @Override

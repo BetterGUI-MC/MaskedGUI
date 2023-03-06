@@ -15,26 +15,29 @@
 */
 package me.hsgamer.bettergui.maskedgui;
 
+import me.hsgamer.bettergui.BetterGUI;
 import me.hsgamer.bettergui.builder.ActionBuilder;
 import me.hsgamer.bettergui.builder.MenuBuilder;
+import me.hsgamer.bettergui.config.TemplateConfig;
 import me.hsgamer.bettergui.maskedgui.action.NextPageAction;
 import me.hsgamer.bettergui.maskedgui.action.RefreshMaskAction;
 import me.hsgamer.bettergui.maskedgui.action.SetMaskAction;
 import me.hsgamer.bettergui.maskedgui.action.SetPageAction;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.config.TemplateMaskConfig;
 import me.hsgamer.bettergui.maskedgui.mask.*;
 import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
 import me.hsgamer.hscore.bukkit.addon.PluginAddon;
 import me.hsgamer.hscore.checker.spigotmc.SpigotVersionChecker;
 
+import java.io.File;
 import java.util.logging.Level;
 
 public final class MaskedGUI extends PluginAddon {
-    private final TemplateMaskConfig templateMaskConfig = new TemplateMaskConfig(this);
+    private final TemplateConfig templateMaskConfig = new TemplateConfig(new File(getDataFolder(), "template"));
 
     @Override
     public void onEnable() {
+        templateMaskConfig.setIncludeMenuInTemplate(BetterGUI.getInstance().getMainConfig().includeMenuInTemplate);
         templateMaskConfig.setup();
 
         MenuBuilder.INSTANCE.register(MaskedMenu::new, "masked");
@@ -75,7 +78,9 @@ public final class MaskedGUI extends PluginAddon {
 
     @Override
     public void onReload() {
-        templateMaskConfig.reload();
+        templateMaskConfig.clear();
+        templateMaskConfig.setIncludeMenuInTemplate(BetterGUI.getInstance().getMainConfig().includeMenuInTemplate);
+        templateMaskConfig.setup();
     }
 
     @Override
@@ -83,7 +88,7 @@ public final class MaskedGUI extends PluginAddon {
         templateMaskConfig.clear();
     }
 
-    public TemplateMaskConfig getTemplateMaskConfig() {
+    public TemplateConfig getTemplateMaskConfig() {
         return templateMaskConfig;
     }
 }

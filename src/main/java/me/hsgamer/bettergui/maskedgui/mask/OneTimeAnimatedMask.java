@@ -16,7 +16,6 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.api.menu.Menu;
-import me.hsgamer.bettergui.maskedgui.MaskedGUI;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
@@ -25,26 +24,23 @@ import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.common.Validate;
+import me.hsgamer.hscore.minecraft.gui.GUIProperties;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.mask.Mask;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class OneTimeAnimatedMask implements WrappedMask {
-    private final MaskedGUI addon;
     private final MaskBuilder.Input input;
     private final List<Mask> masks = new ArrayList<>();
     private final Map<UUID, SequenceRunner> runnerMap = new ConcurrentHashMap<>();
     private final SignalHandler signalHandler = new SignalHandler();
-    private long update = 0;
-    private boolean async = true;
+    private long updateMillis = 50L;
     private boolean viewLast = false;
 
-    public OneTimeAnimatedMask(MaskedGUI addon, MaskBuilder.Input input) {
-        this.addon = addon;
+    public OneTimeAnimatedMask(MaskBuilder.Input input) {
         this.input = input;
     }
 
@@ -61,15 +57,8 @@ public class OneTimeAnimatedMask implements WrappedMask {
     @Override
     public boolean canView(UUID uuid) {
         if (masks.isEmpty()) return false;
-        SequenceRunner runner = runnerMap.computeIfAbsent(uuid, k -> {
-            SequenceRunner newRunner = new SequenceRunner(masks.size());
-            if (async) {
-                newRunner.runTaskTimerAsynchronously(addon.getPlugin(), update, update);
-            } else {
-                newRunner.runTaskTimer(addon.getPlugin(), update, update);
-            }
-            return newRunner;
-        });
+        SequenceRunner runner = runnerMap.computeIfAbsent(uuid, k -> new SequenceRunner());
+        runner.updateIndex();
 
         int index = runner.index;
         if (index < 0 || index >= masks.size()) {
@@ -96,7 +85,7 @@ public class OneTimeAnimatedMask implements WrappedMask {
     }
 
     private void reset(UUID uuid) {
-        Optional.ofNullable(runnerMap.remove(uuid)).ifPresent(SequenceRunner::cancel);
+        Optional.ofNullable(runnerMap.get(uuid)).ifPresent(SequenceRunner::reset);
     }
 
     @Override
@@ -114,16 +103,13 @@ public class OneTimeAnimatedMask implements WrappedMask {
     @Override
     public void init() {
         masks.addAll(MaskUtil.createChildMasksAsList(this, input.options));
-        update = Optional.ofNullable(input.options.get("update"))
+        updateMillis = Optional.ofNullable(input.options.get("update"))
                 .map(String::valueOf)
                 .flatMap(Validate::getNumber)
                 .filter(bigDecimal -> bigDecimal.compareTo(BigDecimal.ZERO) > 0)
                 .map(BigDecimal::longValue)
-                .orElse(update);
-        async = Optional.ofNullable(input.options.get("async"))
-                .map(String::valueOf)
-                .map(Boolean::parseBoolean)
-                .orElse(async);
+                .map(tick -> tick * GUIProperties.getMillisPerTick())
+                .orElse(updateMillis);
         viewLast = Optional.ofNullable(MapUtil.getIfFound(input.options, "view-last", "keep-last", "last"))
                 .map(String::valueOf)
                 .map(Boolean::parseBoolean)
@@ -138,34 +124,36 @@ public class OneTimeAnimatedMask implements WrappedMask {
     @Override
     public void stop() {
         signalHandler.clear();
-        runnerMap.values().forEach(SequenceRunner::stop);
         runnerMap.clear();
         masks.forEach(Mask::stop);
         masks.clear();
     }
 
-    private static class SequenceRunner extends BukkitRunnable {
-        private final int max;
+    private class SequenceRunner {
         private int index = 0;
+        private long lastTickMillis = System.currentTimeMillis();
         private boolean maxed = false;
 
-        private SequenceRunner(int max) {
-            this.max = max;
-        }
+        public void updateIndex() {
+            long currentTick = System.currentTimeMillis();
+            long diff = currentTick - lastTickMillis;
+            long passed = diff / updateMillis;
+            long remainder = diff % updateMillis;
+            lastTickMillis = currentTick - remainder;
 
-        @Override
-        public void run() {
-            if (maxed) return;
-            if (index < max - 1) {
-                index++;
-            } else {
+            int max = masks.size();
+            if (index + passed >= max) {
+                index = max - 1;
                 maxed = true;
-                cancel();
+            } else {
+                index += passed;
             }
         }
 
-        public void stop() {
-            cancel();
+        public void reset() {
+            index = 0;
+            lastTickMillis = System.currentTimeMillis();
+            maxed = false;
         }
     }
 }

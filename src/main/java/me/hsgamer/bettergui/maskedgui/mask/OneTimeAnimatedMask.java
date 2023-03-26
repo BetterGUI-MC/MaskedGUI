@@ -58,7 +58,9 @@ public class OneTimeAnimatedMask implements WrappedMask {
     public boolean canView(UUID uuid) {
         if (masks.isEmpty()) return false;
         SequenceRunner runner = runnerMap.computeIfAbsent(uuid, k -> new SequenceRunner());
-        runner.updateIndex();
+        if (!runner.maxed) {
+            runner.updateIndex();
+        }
 
         int index = runner.index;
         if (index < 0 || index >= masks.size()) {

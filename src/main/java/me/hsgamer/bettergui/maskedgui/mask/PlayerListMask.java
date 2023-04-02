@@ -23,13 +23,14 @@ import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
 import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
+import me.hsgamer.hscore.bukkit.scheduler.Scheduler;
+import me.hsgamer.hscore.bukkit.scheduler.Task;
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.minecraft.gui.GUIProperties;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -51,7 +52,7 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
     private Map<String, Object> templateButton = Collections.emptyMap();
     private ConditionRequirement playerCondition;
     private List<String> viewerConditionTemplate = Collections.emptyList();
-    private BukkitTask updateTask;
+    private Task updateTask;
     private boolean viewSelf = true;
     private boolean viewOffline = true;
     private long playerUpdateTicks = 20L;
@@ -220,7 +221,7 @@ public class PlayerListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
     @Override
     public void init() {
         super.init();
-        updateTask = Bukkit.getScheduler().runTaskTimerAsynchronously(addon.getPlugin(), this::updatePlayerList, 0L, playerUpdateTicks);
+        updateTask = Scheduler.CURRENT.runTaskTimer(addon.getPlugin(), this::updatePlayerList, 0L, playerUpdateTicks, true);
     }
 
     @Override

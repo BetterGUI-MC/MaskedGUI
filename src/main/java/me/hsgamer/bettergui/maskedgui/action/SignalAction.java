@@ -20,8 +20,8 @@ import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.builder.ActionBuilder;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
+import me.hsgamer.hscore.bukkit.scheduler.Scheduler;
 import me.hsgamer.hscore.task.element.TaskProcess;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 import java.util.UUID;
@@ -46,9 +46,9 @@ public abstract class SignalAction extends BaseAction {
         }
         MaskedMenu maskedMenu = (MaskedMenu) menu;
         Signal signal = createSignal(uuid, value);
-        Bukkit.getScheduler().runTask(plugin, () -> {
+        Scheduler.CURRENT.runTask(plugin, () -> {
             maskedMenu.handleSignal(uuid, signal);
             process.next();
-        });
+        }, false);
     }
 }

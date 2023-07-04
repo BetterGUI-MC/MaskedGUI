@@ -48,8 +48,8 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
     private Map<String, Object> templateButton = Collections.emptyMap();
     private List<String> viewerConditionTemplate = Collections.emptyList();
     private Task updateTask;
-    private long valueUpdateTicks = 20L;
-    private long viewerUpdateMillis = 50L;
+    protected long valueUpdateTicks = 20L;
+    protected long viewerUpdateMillis = 50L;
 
     protected ValueListMask(Function<Runnable, Task> scheduler, MaskBuilder.Input input) {
         super(input);
@@ -76,10 +76,6 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
     protected abstract boolean isValueActivated(T value);
 
     protected abstract boolean canViewValue(UUID uuid, T value);
-
-    public void setValueUpdateTicks(long valueUpdateTicks) {
-        this.valueUpdateTicks = valueUpdateTicks;
-    }
 
     private String replaceShortcut(String string, T value) {
         Matcher matcher = shortcutPattern.matcher(string);
@@ -168,6 +164,10 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
                 .map(ticks -> Math.max(ticks, 1) * GUIProperties.getMillisPerTick())
                 .map(millis -> Math.max(millis, 1L))
                 .orElse(50L);
+        valueUpdateTicks = Optional.ofNullable(MapUtil.getIfFound(section, "value-update-ticks", "value-update"))
+                .map(String::valueOf)
+                .map(Long::parseLong)
+                .orElse(20L);
         return new ButtonPaginatedMask(getName(), MultiSlotUtil.getSlots(section)) {
             @Override
             public @NotNull List<@NotNull Button> getButtons(@NotNull UUID uuid) {

@@ -120,10 +120,10 @@ public class PlayerListMask extends ValueListMask<UUID> {
         playerCondition = Optional.ofNullable(MapUtil.getIfFound(section, "player-condition"))
                 .map(o -> new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", getName() + "_player_condition", o)))
                 .orElse(null);
-        Optional.ofNullable(MapUtil.getIfFound(section, "player-update-ticks", "player-update"))
+        valueUpdateTicks = Optional.ofNullable(MapUtil.getIfFound(section, "player-update-ticks", "player-update"))
                 .map(String::valueOf)
                 .map(Long::parseLong)
-                .ifPresent(this::setValueUpdateTicks);
+                .orElse(valueUpdateTicks);
         return super.createPaginatedMask(section);
     }
 }

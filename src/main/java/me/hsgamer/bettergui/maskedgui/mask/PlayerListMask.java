@@ -16,7 +16,6 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.builder.RequirementBuilder;
-import me.hsgamer.bettergui.maskedgui.MaskedGUI;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
 import me.hsgamer.bettergui.util.MapUtil;
@@ -37,8 +36,8 @@ public class PlayerListMask extends ValueListMask<UUID> {
     private boolean viewSelf = true;
     private boolean viewOffline = true;
 
-    public PlayerListMask(MaskedGUI addon, MaskBuilder.Input input) {
-        super(addon, input);
+    public PlayerListMask(MaskBuilder.Input input) {
+        super(input);
         this.variablePrefix = getName() + "_current_";
         input.menu.getVariableManager().register(variablePrefix, (original, uuid) -> {
             String[] split = original.split(";", 3);

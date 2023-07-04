@@ -15,9 +15,9 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import me.hsgamer.bettergui.BetterGUI;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.builder.RequirementBuilder;
-import me.hsgamer.bettergui.maskedgui.MaskedGUI;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
@@ -45,11 +45,11 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
     private final Map<T, ValueEntry<T>> valueEntryMap = new ConcurrentHashMap<>();
     private final Map<UUID, ValueListCache> playerListCacheMap = new ConcurrentHashMap<>();
     private final Function<Runnable, Task> scheduler;
+    protected long valueUpdateTicks = 20L;
+    protected long viewerUpdateMillis = 50L;
     private Map<String, Object> templateButton = Collections.emptyMap();
     private List<String> viewerConditionTemplate = Collections.emptyList();
     private Task updateTask;
-    protected long valueUpdateTicks = 20L;
-    protected long viewerUpdateMillis = 50L;
 
     protected ValueListMask(Function<Runnable, Task> scheduler, MaskBuilder.Input input) {
         super(input);
@@ -57,9 +57,9 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
         shortcutPattern = Pattern.compile("\\{" + Pattern.quote(getShortcutPatternPrefix()) + "(_([^{}]+))?}");
     }
 
-    protected ValueListMask(MaskedGUI addon, MaskBuilder.Input input) {
+    protected ValueListMask(MaskBuilder.Input input) {
         super(input);
-        this.scheduler = runnable -> Scheduler.CURRENT.runTaskTimer(addon.getPlugin(), runnable, 0L, valueUpdateTicks, true);
+        this.scheduler = runnable -> Scheduler.CURRENT.runTaskTimer(BetterGUI.getInstance(), runnable, 0L, valueUpdateTicks, true);
         shortcutPattern = Pattern.compile("\\{" + Pattern.quote(getShortcutPatternPrefix()) + "(_([^{}]+))?}");
     }
 

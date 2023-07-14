@@ -33,10 +33,15 @@ import java.io.File;
 import java.util.logging.Level;
 
 public final class MaskedGUI extends PluginAddon {
-    private final TemplateConfig templateMaskConfig = new TemplateConfig(new File(getDataFolder(), "template"));
+    private TemplateConfig templateMaskConfig = new TemplateConfig(new File(getDataFolder(), "template"));
 
     @Override
     public void onEnable() {
+        File file = new File(getDataFolder(), "template");
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        templateMaskConfig = new TemplateConfig(file);
         templateMaskConfig.setIncludeMenuInTemplate(BetterGUI.getInstance().getMainConfig().includeMenuInTemplate);
         templateMaskConfig.setup();
 

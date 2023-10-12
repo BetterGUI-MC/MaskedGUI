@@ -71,7 +71,9 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
 
     protected abstract String getValueIndicator();
 
-    protected abstract String getValueAsString(T value);
+    protected String getValueAsString(T value) {
+        return Objects.toString(value);
+    }
 
     protected abstract boolean isValueActivated(T value);
 

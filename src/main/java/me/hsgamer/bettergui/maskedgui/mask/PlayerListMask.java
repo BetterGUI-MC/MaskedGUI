@@ -92,11 +92,6 @@ public class PlayerListMask extends ValueListMask<UUID> {
     }
 
     @Override
-    protected String getValueAsString(UUID value) {
-        return value.toString();
-    }
-
-    @Override
     protected boolean isValueActivated(UUID value) {
         return playerCondition == null || playerCondition.check(value).isSuccess;
     }

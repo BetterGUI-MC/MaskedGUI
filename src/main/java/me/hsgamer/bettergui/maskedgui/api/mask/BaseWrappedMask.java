@@ -20,6 +20,7 @@ import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.mask.Mask;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Map;
@@ -57,17 +58,17 @@ public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
     }
 
     @Override
-    public Map<Integer, Button> generateButtons(UUID uuid) {
-        return mask == null ? Collections.emptyMap() : mask.generateButtons(uuid);
+    public @NotNull Map<Integer, Button> generateButtons(@NotNull UUID uuid, int size) {
+        return mask == null ? Collections.emptyMap() : mask.generateButtons(uuid, size);
     }
 
     @Override
-    public boolean canView(UUID uuid) {
+    public boolean canView(@NotNull UUID uuid) {
         return mask != null && mask.canView(uuid);
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return input.name;
     }
 

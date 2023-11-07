@@ -18,15 +18,14 @@ package me.hsgamer.bettergui.maskedgui.action;
 import me.hsgamer.bettergui.builder.ActionBuilder;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.signal.NextPageSignal;
-import org.bukkit.plugin.Plugin;
 
 import java.util.UUID;
 
 public class NextPageAction extends SignalAction {
     private final boolean next;
 
-    public NextPageAction(Plugin plugin, ActionBuilder.Input input, boolean next) {
-        super(plugin, input);
+    public NextPageAction(ActionBuilder.Input input, boolean next) {
+        super(input);
         this.next = next;
     }
 

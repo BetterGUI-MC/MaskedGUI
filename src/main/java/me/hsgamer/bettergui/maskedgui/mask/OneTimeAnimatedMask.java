@@ -22,7 +22,7 @@ import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.signal.RefreshMaskSignal;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
-import me.hsgamer.bettergui.util.MapUtil;
+import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.common.Validate;
 import me.hsgamer.hscore.minecraft.gui.GUIProperties;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
@@ -73,7 +73,7 @@ public class OneTimeAnimatedMask implements WrappedMask {
     }
 
     @Override
-    public Map<Integer, Button> generateButtons(UUID uuid) {
+    public Map<Integer, Button> generateButtons(UUID uuid, int size) {
         if (masks.isEmpty()) return Collections.emptyMap();
         SequenceRunner runner = runnerMap.get(uuid);
         if (runner == null) {
@@ -83,7 +83,7 @@ public class OneTimeAnimatedMask implements WrappedMask {
         if (index < 0 || index >= masks.size()) {
             return Collections.emptyMap();
         }
-        return masks.get(index).generateButtons(uuid);
+        return masks.get(index).generateButtons(uuid, size);
     }
 
     private void reset(UUID uuid) {
@@ -112,7 +112,7 @@ public class OneTimeAnimatedMask implements WrappedMask {
                 .map(BigDecimal::longValue)
                 .map(tick -> tick * GUIProperties.getMillisPerTick())
                 .orElse(updateMillis);
-        viewLast = Optional.ofNullable(MapUtil.getIfFound(input.options, "view-last", "keep-last", "last"))
+        viewLast = Optional.ofNullable(MapUtils.getIfFound(input.options, "view-last", "keep-last", "last"))
                 .map(String::valueOf)
                 .map(Boolean::parseBoolean)
                 .orElse(viewLast);

@@ -15,16 +15,17 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
-import me.hsgamer.bettergui.BetterGUI;
 import me.hsgamer.bettergui.api.requirement.Requirement;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.requirement.RequirementApplier;
-import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.bettergui.util.ProcessApplierConstants;
+import me.hsgamer.hscore.bukkit.scheduler.Scheduler;
+import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.PredicateMask;
+import me.hsgamer.hscore.task.BatchRunnable;
 
 import java.util.Map;
 import java.util.Optional;
@@ -44,8 +45,8 @@ public class WrappedPredicateMask extends BaseWrappedMask<PredicateMask> {
         PredicateMask predicateMask = new PredicateMask(getName());
 
         boolean checkOnlyOnCreation = Optional.ofNullable(section.get("check-only-on-creation")).map(String::valueOf).map(Boolean::parseBoolean).orElse(false);
-        Optional.ofNullable(MapUtil.getIfFound(section, "requirement", "view-requirement"))
-                .flatMap(MapUtil::castOptionalStringObjectMap)
+        Optional.ofNullable(MapUtils.getIfFound(section, "requirement", "view-requirement"))
+                .flatMap(MapUtils::castOptionalStringObjectMap)
                 .ifPresent(subsection -> {
                     RequirementApplier requirementApplier = new RequirementApplier(getMenu(), getName() + "_view", subsection);
                     predicateMask.setViewPredicate(uuid -> {
@@ -56,19 +57,21 @@ public class WrappedPredicateMask extends BaseWrappedMask<PredicateMask> {
                         if (result.isSuccess) {
                             checked.add(uuid);
                         }
-                        BetterGUI.runBatchRunnable(batchRunnable -> batchRunnable.getTaskPool(ProcessApplierConstants.REQUIREMENT_ACTION_STAGE).addLast(process -> {
+                        BatchRunnable batchRunnable = new BatchRunnable();
+                        batchRunnable.getTaskPool(ProcessApplierConstants.REQUIREMENT_ACTION_STAGE).addLast(process -> {
                             result.applier.accept(uuid, process);
                             process.next();
-                        }));
+                        });
+                        Scheduler.current().async().runTask(batchRunnable);
                         return result.isSuccess;
                     });
                 });
-        Optional.ofNullable(MapUtil.getIfFound(section, "success-mask", "success", "view-mask", "view"))
-                .flatMap(MapUtil::castOptionalStringObjectMap)
+        Optional.ofNullable(MapUtils.getIfFound(section, "success-mask", "success", "view-mask", "view"))
+                .flatMap(MapUtils::castOptionalStringObjectMap)
                 .flatMap(subsection -> MaskBuilder.INSTANCE.build(new MaskBuilder.Input(getMenu(), getName() + "_success", subsection)))
                 .ifPresent(predicateMask::setMask);
-        Optional.ofNullable(MapUtil.getIfFound(section, "fail-mask", "fail", "fallback-mask", "fallback"))
-                .flatMap(MapUtil::castOptionalStringObjectMap)
+        Optional.ofNullable(MapUtils.getIfFound(section, "fail-mask", "fail", "fallback-mask", "fallback"))
+                .flatMap(MapUtils::castOptionalStringObjectMap)
                 .flatMap(subsection -> MaskBuilder.INSTANCE.build(new MaskBuilder.Input(getMenu(), getName() + "_fail", subsection)))
                 .ifPresent(predicateMask::setFallbackMask);
         return predicateMask;

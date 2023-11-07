@@ -23,7 +23,7 @@ import me.hsgamer.bettergui.maskedgui.signal.RefreshMaskSignal;
 import me.hsgamer.bettergui.maskedgui.signal.SetMaskSignal;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
-import me.hsgamer.bettergui.util.MapUtil;
+import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.PlaceholderMask;
 import me.hsgamer.hscore.ui.property.Initializable;
 
@@ -45,7 +45,7 @@ public class SwitchMask extends BaseWrappedMask<PlaceholderMask> {
         childMasks = MaskUtil.createChildMasks(this, section);
 
         PlaceholderMask mask = new PlaceholderMask(getName()).setInitDefaultMask(false);
-        Optional.ofNullable(MapUtil.getIfFound(section, "default", "default-mask"))
+        Optional.ofNullable(MapUtils.getIfFound(section, "default", "default-mask"))
                 .map(String::valueOf)
                 .map(childMasks::get)
                 .ifPresent(mask::setDefaultMask);

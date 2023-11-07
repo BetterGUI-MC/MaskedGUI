@@ -18,8 +18,8 @@ package me.hsgamer.bettergui.maskedgui.mask;
 import me.hsgamer.bettergui.builder.RequirementBuilder;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
-import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
+import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -39,7 +39,7 @@ public class PlayerListMask extends ValueListMask<UUID> {
     public PlayerListMask(MaskBuilder.Input input) {
         super(input);
         this.variablePrefix = getName() + "_current_";
-        input.menu.getVariableManager().register(variablePrefix, (original, uuid) -> {
+        input.menu.getVariableManager().register(variablePrefix, original -> {
             String[] split = original.split(";", 3);
             if (split.length < 2) {
                 return null;
@@ -103,18 +103,18 @@ public class PlayerListMask extends ValueListMask<UUID> {
 
     @Override
     protected ButtonPaginatedMask createPaginatedMask(Map<String, Object> section) {
-        viewSelf = Optional.ofNullable(MapUtil.getIfFound(section, "view-self", "self"))
+        viewSelf = Optional.ofNullable(MapUtils.getIfFound(section, "view-self", "self"))
                 .map(String::valueOf)
                 .map(Boolean::parseBoolean)
                 .orElse(true);
-        viewOffline = Optional.ofNullable(MapUtil.getIfFound(section, "view-offline", "offline"))
+        viewOffline = Optional.ofNullable(MapUtils.getIfFound(section, "view-offline", "offline"))
                 .map(String::valueOf)
                 .map(Boolean::parseBoolean)
                 .orElse(false);
-        playerCondition = Optional.ofNullable(MapUtil.getIfFound(section, "player-condition"))
+        playerCondition = Optional.ofNullable(MapUtils.getIfFound(section, "player-condition"))
                 .map(o -> new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", getName() + "_player_condition", o)))
                 .orElse(null);
-        valueUpdateTicks = Optional.ofNullable(MapUtil.getIfFound(section, "player-update-ticks", "player-update"))
+        valueUpdateTicks = Optional.ofNullable(MapUtils.getIfFound(section, "player-update-ticks", "player-update"))
                 .map(String::valueOf)
                 .map(Long::parseLong)
                 .orElse(valueUpdateTicks);

@@ -18,15 +18,14 @@ package me.hsgamer.bettergui.maskedgui.action;
 import me.hsgamer.bettergui.builder.ActionBuilder;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.signal.SetPageSignal;
-import org.bukkit.plugin.Plugin;
 
 import java.util.UUID;
 
 public class SetPageAction extends SignalAction {
     private final String signalName;
 
-    public SetPageAction(Plugin plugin, ActionBuilder.Input input) {
-        super(plugin, input);
+    public SetPageAction(ActionBuilder.Input input) {
+        super(input);
         signalName = input.option.trim();
     }
 

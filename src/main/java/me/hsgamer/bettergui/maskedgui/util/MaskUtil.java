@@ -20,8 +20,8 @@ import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
+import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.mask.Mask;
 
@@ -36,7 +36,7 @@ public final class MaskUtil {
         Map<String, WrappedButton> buttons = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : buttonMap.entrySet()) {
             String name = entry.getKey();
-            Optional<Map<String, Object>> optionalValues = MapUtil.castOptionalStringObjectMap(entry.getValue());
+            Optional<Map<String, Object>> optionalValues = MapUtils.castOptionalStringObjectMap(entry.getValue());
             if (!optionalValues.isPresent()) continue;
             Map<String, Object> values = new CaseInsensitiveStringMap<>(optionalValues.get());
             ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(wrappedMask.getMenu(), prefix + name, values)).ifPresent(button -> buttons.put(name, button));
@@ -70,8 +70,8 @@ public final class MaskUtil {
     }
 
     public static Map<String, WrappedMask> createChildMasks(WrappedMask mask, Map<String, Object> options) {
-        return Optional.ofNullable(MapUtil.getIfFound(options, "masks", "child"))
-                .flatMap(MapUtil::castOptionalStringObjectMap)
+        return Optional.ofNullable(MapUtils.getIfFound(options, "masks", "child"))
+                .flatMap(MapUtils::castOptionalStringObjectMap)
                 .map(o -> MaskBuilder.INSTANCE.getChildMasksAsMap(mask, o))
                 .orElseGet(Collections::emptyMap);
     }
@@ -81,8 +81,8 @@ public final class MaskUtil {
     }
 
     public static Map<String, WrappedButton> createChildButtons(WrappedMask mask, Map<String, Object> options) {
-        return Optional.ofNullable(MapUtil.getIfFound(options, "button", "buttons", "child"))
-                .flatMap(MapUtil::castOptionalStringObjectMap)
+        return Optional.ofNullable(MapUtils.getIfFound(options, "button", "buttons", "child"))
+                .flatMap(MapUtils::castOptionalStringObjectMap)
                 .map(o -> createButtons(mask, o))
                 .orElseGet(Collections::emptyMap);
     }

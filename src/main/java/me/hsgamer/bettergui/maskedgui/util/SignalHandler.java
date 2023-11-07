@@ -16,7 +16,7 @@
 package me.hsgamer.bettergui.maskedgui.util;
 
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
-import me.hsgamer.bettergui.util.MapUtil;
+import me.hsgamer.hscore.common.MapUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +41,7 @@ public class SignalHandler {
     }
 
     public SignalHandler setSignal(Map<String, Object> options, String defaultName) {
-        this.signalName = Objects.toString(MapUtil.getIfFoundOrDefault(options, defaultName, "signal", "signal-id"));
+        this.signalName = Objects.toString(MapUtils.getIfFoundOrDefault(options, defaultName, "signal", "signal-id"));
         return this;
     }
 

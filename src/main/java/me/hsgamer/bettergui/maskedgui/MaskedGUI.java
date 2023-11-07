@@ -15,7 +15,8 @@
 */
 package me.hsgamer.bettergui.maskedgui;
 
-import me.hsgamer.bettergui.BetterGUI;
+import me.hsgamer.bettergui.api.addon.GetPlugin;
+import me.hsgamer.bettergui.api.addon.Reloadable;
 import me.hsgamer.bettergui.builder.ActionBuilder;
 import me.hsgamer.bettergui.builder.MenuBuilder;
 import me.hsgamer.bettergui.config.TemplateConfig;
@@ -26,13 +27,15 @@ import me.hsgamer.bettergui.maskedgui.action.SetPageAction;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.mask.*;
 import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
-import me.hsgamer.hscore.bukkit.addon.PluginAddon;
 import me.hsgamer.hscore.checker.spigotmc.SpigotVersionChecker;
+import me.hsgamer.hscore.expansion.common.Expansion;
+import me.hsgamer.hscore.expansion.extra.expansion.DataFolder;
+import me.hsgamer.hscore.expansion.extra.expansion.GetClassLoader;
 
 import java.io.File;
 import java.util.logging.Level;
 
-public final class MaskedGUI extends PluginAddon {
+public final class MaskedGUI implements Expansion, DataFolder, GetPlugin, GetClassLoader, Reloadable {
     private TemplateConfig templateMaskConfig = new TemplateConfig(new File(getDataFolder(), "template"));
 
     @Override
@@ -42,16 +45,15 @@ public final class MaskedGUI extends PluginAddon {
             file.mkdirs();
         }
         templateMaskConfig = new TemplateConfig(file);
-        templateMaskConfig.setIncludeMenuInTemplate(BetterGUI.getInstance().getMainConfig().includeMenuInTemplate);
         templateMaskConfig.setup();
 
         MenuBuilder.INSTANCE.register(MaskedMenu::new, "masked");
 
-        ActionBuilder.INSTANCE.register(input -> new NextPageAction(getPlugin(), input, true), "next-page");
-        ActionBuilder.INSTANCE.register(input -> new NextPageAction(getPlugin(), input, false), "previous-page", "back-page");
-        ActionBuilder.INSTANCE.register(input -> new SetPageAction(getPlugin(), input), "set-page", "page");
-        ActionBuilder.INSTANCE.register(input -> new RefreshMaskAction(getPlugin(), input), "refresh-mask");
-        ActionBuilder.INSTANCE.register(input -> new SetMaskAction(getPlugin(), input), "set-mask");
+        ActionBuilder.INSTANCE.register(input -> new NextPageAction(input, true), "next-page");
+        ActionBuilder.INSTANCE.register(input -> new NextPageAction(input, false), "previous-page", "back-page");
+        ActionBuilder.INSTANCE.register(SetPageAction::new, "set-page", "page");
+        ActionBuilder.INSTANCE.register(RefreshMaskAction::new, "refresh-mask");
+        ActionBuilder.INSTANCE.register(SetMaskAction::new, "set-mask");
 
         MaskBuilder.INSTANCE.setDefaultMaskType("simple");
         MaskBuilder.INSTANCE.register(WrappedSimpleMask::new, "simple");
@@ -73,7 +75,7 @@ public final class MaskedGUI extends PluginAddon {
         new SpigotVersionChecker(107475).getVersion().whenComplete((output, throwable) -> {
             if (throwable != null) {
                 getPlugin().getLogger().log(Level.WARNING, "Cannot check the latest version of MaskedGUI", throwable);
-            } else if (this.getDescription().getVersion().equalsIgnoreCase(output)) {
+            } else if (this.getExpansionClassLoader().getDescription().getVersion().equalsIgnoreCase(output)) {
                 getPlugin().getLogger().info("You are using the latest version of MaskedGUI");
             } else {
                 getPlugin().getLogger().warning("You are using an outdated version of MaskedGUI. Please update to " + output);
@@ -84,7 +86,6 @@ public final class MaskedGUI extends PluginAddon {
     @Override
     public void onReload() {
         templateMaskConfig.clear();
-        templateMaskConfig.setIncludeMenuInTemplate(BetterGUI.getInstance().getMainConfig().includeMenuInTemplate);
         templateMaskConfig.setup();
     }
 

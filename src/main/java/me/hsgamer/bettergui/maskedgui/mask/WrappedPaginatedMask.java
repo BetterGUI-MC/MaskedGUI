@@ -22,6 +22,7 @@ import me.hsgamer.bettergui.maskedgui.signal.NextPageSignal;
 import me.hsgamer.bettergui.maskedgui.signal.RefreshMaskSignal;
 import me.hsgamer.bettergui.maskedgui.signal.SetPageSignal;
 import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
+import me.hsgamer.hscore.common.StringReplacer;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.PaginatedMask;
 
 import java.util.Map;
@@ -33,14 +34,14 @@ public abstract class WrappedPaginatedMask<T extends PaginatedMask> extends Base
 
     protected WrappedPaginatedMask(MaskBuilder.Input input) {
         super(input);
-        input.menu.getVariableManager().register(getName() + "_page", (original, uuid) -> {
+        input.menu.getVariableManager().register(getName() + "_page", StringReplacer.of((original, uuid) -> {
             if (getMask() == null) return null;
             return Integer.toString(getMask().getPage(uuid) + 1);
-        });
-        input.menu.getVariableManager().register(getName() + "_max", (original, uuid) -> {
+        }));
+        input.menu.getVariableManager().register(getName() + "_max", StringReplacer.of((original, uuid) -> {
             if (getMask() == null) return null;
             return Integer.toString(getMask().getPageAmount(uuid));
-        });
+        }));
     }
 
     protected abstract T createPaginatedMask(Map<String, Object> section);

@@ -7,11 +7,11 @@
     <parent>
         <groupId>me.hsgamer.bettergui</groupId>
         <artifactId>addon-parent</artifactId>
-        <version>2.2</version>
+        <version>3.0</version>
     </parent>
 
     <artifactId>MaskedGUI</artifactId>
-    <version>2.7</version>
+    <version>3.0</version>
     <packaging>jar</packaging>
 
     <name>MaskedGUI</name>
@@ -60,7 +60,7 @@
         <dependency>
             <groupId>me.hsgamer</groupId>
             <artifactId>hscore-minecraft-gui-advanced</artifactId>
-            <version>4.2.19</version>
+            <version>4.3.16</version>
             <exclusions>
                 <exclusion>
                     <groupId>me.hsgamer</groupId>

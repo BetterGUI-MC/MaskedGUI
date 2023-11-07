@@ -24,6 +24,7 @@ import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,23 +42,15 @@ public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMas
     }
 
     public void register(Function<Input, WrappedMask> creator, String... type) {
-        register(new Element<Input, WrappedMask>() {
-            @Override
-            public boolean canBuild(Input input) {
-                Map<String, Object> keys = new CaseInsensitiveStringMap<>(input.options);
-                String mask = Objects.toString(keys.get("mask"), defaultMaskType);
-                for (String s : type) {
-                    if (mask.equalsIgnoreCase(s)) {
-                        return true;
-                    }
+        register(input -> {
+            Map<String, Object> keys = new CaseInsensitiveStringMap<>(input.options);
+            String mask = Objects.toString(keys.get("mask"), defaultMaskType);
+            for (String s : type) {
+                if (mask.equalsIgnoreCase(s)) {
+                    return Optional.of(creator.apply(input));
                 }
-                return false;
             }
-
-            @Override
-            public WrappedMask build(Input input) {
-                return creator.apply(input);
-            }
+            return Optional.empty();
         });
     }
 

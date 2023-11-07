@@ -21,10 +21,11 @@ import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
-import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
+import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.common.Validate;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -50,29 +51,29 @@ public class ProgressMask implements WrappedMask {
     }
 
     @Override
-    public Map<Integer, Button> generateButtons(UUID uuid) {
+    public @NotNull Map<Integer, Button> generateButtons(@NotNull UUID uuid, int size) {
         String parsedCurrentValue = StringReplacerApplier.replace(currentValue, uuid, this);
         String parsedMaxValue = StringReplacerApplier.replace(maxValue, uuid, this);
 
         double current = Validate.getNumber(parsedCurrentValue).map(Number::doubleValue).orElse(0.0);
         double max = Validate.getNumber(parsedMaxValue).map(Number::doubleValue).orElse(100.0);
 
-        int size = slots.size();
-        int completeSize = max <= 0 || current < 0 ? 0 : (int) Math.round(current / max * size);
-        completeSize = Math.min(completeSize, size);
+        int slotsSize = slots.size();
+        int completeSize = max <= 0 || current < 0 ? 0 : (int) Math.round(current / max * slotsSize);
+        completeSize = Math.min(completeSize, slotsSize);
 
         Map<Integer, Button> buttonMap = new HashMap<>();
         for (int i = 0; i < completeSize; i++) {
             buttonMap.put(slots.get(i), completeButton);
         }
-        for (int i = completeSize; i < size; i++) {
+        for (int i = completeSize; i < slotsSize; i++) {
             buttonMap.put(slots.get(i), incompleteButton);
         }
         return buttonMap;
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
@@ -88,17 +89,17 @@ public class ProgressMask implements WrappedMask {
 
     @Override
     public void init() {
-        currentValue = Objects.toString(MapUtil.getIfFoundOrDefault(section, currentValue, "current-value", "current"), currentValue);
-        maxValue = Objects.toString(MapUtil.getIfFoundOrDefault(section, maxValue, "max-value", "max"), maxValue);
+        currentValue = Objects.toString(MapUtils.getIfFoundOrDefault(section, currentValue, "current-value", "current"), currentValue);
+        maxValue = Objects.toString(MapUtils.getIfFoundOrDefault(section, maxValue, "max-value", "max"), maxValue);
         slots = MultiSlotUtil.getSlots(section);
 
-        completeButton = MapUtil.castOptionalStringObjectMap(MapUtil.getIfFound(section, "complete-button", "complete", "current-button"))
+        completeButton = MapUtils.castOptionalStringObjectMap(MapUtils.getIfFound(section, "complete-button", "complete", "current-button"))
                 .flatMap(map -> ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(menu, name + "_complete_button", map)))
                 .map(Button.class::cast)
                 .orElse(Button.EMPTY);
         completeButton.init();
 
-        incompleteButton = MapUtil.castOptionalStringObjectMap(MapUtil.getIfFound(section, "incomplete-button", "incomplete", "max-button"))
+        incompleteButton = MapUtils.castOptionalStringObjectMap(MapUtils.getIfFound(section, "incomplete-button", "incomplete", "max-button"))
                 .flatMap(map -> ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(menu, name + "_incomplete_button", map)))
                 .map(Button.class::cast)
                 .orElse(Button.EMPTY);

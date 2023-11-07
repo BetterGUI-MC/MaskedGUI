@@ -19,8 +19,9 @@ import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.menu.BaseInventoryMenu;
-import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
+import me.hsgamer.hscore.common.MapUtils;
+import me.hsgamer.hscore.config.CaseInsensitivePathString;
 import me.hsgamer.hscore.config.Config;
 import me.hsgamer.hscore.minecraft.gui.advanced.AdvancedButtonMap;
 
@@ -34,27 +35,20 @@ public class MaskedMenu extends BaseInventoryMenu<AdvancedButtonMap> {
     }
 
     @Override
-    protected AdvancedButtonMap createButtonMap(Config config) {
+    protected AdvancedButtonMap createButtonMap() {
         AdvancedButtonMap buttonMap = new AdvancedButtonMap();
-        for (Map.Entry<String, Object> entry : config.getNormalizedValues(false).entrySet()) {
-            String key = entry.getKey();
-            Optional<Map<String, Object>> optionalValue = MapUtil.castOptionalStringObjectMap(entry.getValue());
+        for (Map.Entry<CaseInsensitivePathString, Object> entry : configSettings.entrySet()) {
+            CaseInsensitivePathString key = entry.getKey();
+            Optional<Map<String, Object>> optionalValue = MapUtils.castOptionalStringObjectMap(entry.getValue());
             if (!optionalValue.isPresent()) continue;
             Map<String, Object> value = optionalValue.get();
-            if (key.equalsIgnoreCase("menu-settings")) {
-                Optional.ofNullable(MapUtil.getIfFound(value, "slot-duplicate", "slot-duplication"))
-                        .map(String::valueOf)
-                        .map(Boolean::parseBoolean)
-                        .ifPresent(buttonMap::setAllowSlotDuplication);
-            } else {
-                Map<String, Object> values = new CaseInsensitiveStringMap<>(value);
-                MaskBuilder.INSTANCE
-                        .build(new MaskBuilder.Input(this, "mask_" + key, values))
-                        .ifPresent(mask -> {
-                            mask.init();
-                            buttonMap.addMask(mask);
-                        });
-            }
+            Map<String, Object> values = new CaseInsensitiveStringMap<>(value);
+            MaskBuilder.INSTANCE
+                    .build(new MaskBuilder.Input(this, "mask_" + key, values))
+                    .ifPresent(mask -> {
+                        mask.init();
+                        buttonMap.addMask(mask);
+                    });
         }
         return buttonMap;
     }

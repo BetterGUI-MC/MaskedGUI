@@ -15,16 +15,15 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
-import me.hsgamer.bettergui.BetterGUI;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.builder.RequirementBuilder;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
-import me.hsgamer.bettergui.util.MapUtil;
 import me.hsgamer.hscore.bukkit.scheduler.Scheduler;
 import me.hsgamer.hscore.bukkit.scheduler.Task;
 import me.hsgamer.hscore.common.CollectionUtils;
+import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.minecraft.gui.GUIProperties;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
@@ -59,7 +58,7 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
 
     protected ValueListMask(MaskBuilder.Input input) {
         super(input);
-        this.scheduler = runnable -> Scheduler.CURRENT.runTaskTimer(BetterGUI.getInstance(), runnable, 0L, valueUpdateTicks, true);
+        this.scheduler = runnable -> Scheduler.current().async().runTaskTimer(runnable, 0L, valueUpdateTicks);
         shortcutPattern = Pattern.compile("\\{" + Pattern.quote(getShortcutPatternPrefix()) + "(_([^{}]+))?}");
     }
 
@@ -154,19 +153,19 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
 
     @Override
     protected ButtonPaginatedMask createPaginatedMask(Map<String, Object> section) {
-        templateButton = Optional.ofNullable(MapUtil.getIfFound(section, "template", "button"))
-                .flatMap(MapUtil::castOptionalStringObjectMap)
+        templateButton = Optional.ofNullable(MapUtils.getIfFound(section, "template", "button"))
+                .flatMap(MapUtils::castOptionalStringObjectMap)
                 .orElse(Collections.emptyMap());
-        viewerConditionTemplate = Optional.ofNullable(MapUtil.getIfFound(section, "viewer-condition"))
+        viewerConditionTemplate = Optional.ofNullable(MapUtils.getIfFound(section, "viewer-condition"))
                 .map(CollectionUtils::createStringListFromObject)
                 .orElse(Collections.emptyList());
-        viewerUpdateMillis = Optional.ofNullable(MapUtil.getIfFound(section, "viewer-update-ticks", "viewer-update"))
+        viewerUpdateMillis = Optional.ofNullable(MapUtils.getIfFound(section, "viewer-update-ticks", "viewer-update"))
                 .map(String::valueOf)
                 .map(Long::parseLong)
                 .map(ticks -> Math.max(ticks, 1) * GUIProperties.getMillisPerTick())
                 .map(millis -> Math.max(millis, 1L))
                 .orElse(50L);
-        valueUpdateTicks = Optional.ofNullable(MapUtil.getIfFound(section, "value-update-ticks", "value-update"))
+        valueUpdateTicks = Optional.ofNullable(MapUtils.getIfFound(section, "value-update-ticks", "value-update"))
                 .map(String::valueOf)
                 .map(Long::parseLong)
                 .orElse(20L);

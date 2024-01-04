@@ -22,7 +22,6 @@ import me.hsgamer.bettergui.maskedgui.replacer.ValueReplacer;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
 import me.hsgamer.hscore.common.MapUtils;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
@@ -109,7 +108,7 @@ public class PlayerListMask extends ValueListMask<UUID> {
     }
 
     @Override
-    protected ButtonPaginatedMask createPaginatedMask(Map<String, Object> section) {
+    protected void configure(Map<String, Object> section) {
         viewSelf = Optional.ofNullable(MapUtils.getIfFound(section, "view-self", "self"))
                 .map(String::valueOf)
                 .map(Boolean::parseBoolean)
@@ -125,6 +124,5 @@ public class PlayerListMask extends ValueListMask<UUID> {
                 .map(String::valueOf)
                 .map(Long::parseLong)
                 .orElse(valueUpdateTicks);
-        return super.createPaginatedMask(section);
     }
 }

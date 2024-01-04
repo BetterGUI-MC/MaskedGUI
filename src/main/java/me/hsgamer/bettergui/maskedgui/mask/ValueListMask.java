@@ -80,6 +80,10 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
 
     protected abstract boolean canViewValue(UUID uuid, T value);
 
+    protected void configure(Map<String, Object> section) {
+        // EMPTY
+    }
+
     private Object replace(Object obj, T value) {
         if (obj instanceof String) {
             return valueReplacer.replace((String) obj, value);
@@ -189,6 +193,7 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
                 .map(String::valueOf)
                 .map(Long::parseLong)
                 .orElse(20L);
+        this.configure(section);
         return new ButtonPaginatedMask(getName(), MultiSlotUtil.getSlots(section)) {
             @Override
             public @NotNull List<@NotNull Button> getButtons(@NotNull UUID uuid) {

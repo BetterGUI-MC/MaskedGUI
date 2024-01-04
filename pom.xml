@@ -51,7 +51,6 @@
                             <file>${basedir}/HEADER</file>
                         </licenseHeader>
                     </java>
-                    <ratchetFrom>origin/master</ratchetFrom>
                 </configuration>
             </plugin>
         </plugins>

@@ -17,6 +17,8 @@ package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.builder.RequirementBuilder;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
+import me.hsgamer.bettergui.maskedgui.replacer.SimpleVariableValueReplacer;
+import me.hsgamer.bettergui.maskedgui.replacer.ValueReplacer;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
 import me.hsgamer.hscore.common.MapUtils;
@@ -63,27 +65,32 @@ public class PlayerListMask extends ValueListMask<UUID> {
     }
 
     @Override
-    protected String getShortcutPatternPrefix() {
-        return "current_player";
+    protected ValueReplacer<UUID> createValueReplacer() {
+        return new SimpleVariableValueReplacer<UUID>() {
+            @Override
+            protected String getPrefix() {
+                return "current_player";
+            }
+
+            @Override
+            protected String replaceVariable(String argument, UUID value) {
+                if (argument.isEmpty()) {
+                    return "{" + variablePrefix + getValueAsString(value) + ";player}";
+                } else {
+                    boolean isPAPI = argument.startsWith("papi_");
+                    if (isPAPI) {
+                        argument = argument.substring(5);
+                    }
+                    return "{" + variablePrefix + getValueAsString(value) + ";" + argument + ";" + isPAPI + "}";
+                }
+            }
+        };
     }
 
     @Override
     protected Stream<UUID> getValueStream() {
         return (viewOffline ? Arrays.stream(Bukkit.getOfflinePlayers()) : Bukkit.getOnlinePlayers().stream())
                 .map(OfflinePlayer::getUniqueId);
-    }
-
-    @Override
-    protected String getShortcutReplacement(String argument, UUID value) {
-        if (argument.isEmpty()) {
-            return "{" + variablePrefix + getValueAsString(value) + ";player}";
-        } else {
-            boolean isPAPI = argument.startsWith("papi_");
-            if (isPAPI) {
-                argument = argument.substring(5);
-            }
-            return "{" + variablePrefix + getValueAsString(value) + ";" + argument + ";" + isPAPI + "}";
-        }
     }
 
     @Override

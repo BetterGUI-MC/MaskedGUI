@@ -19,6 +19,7 @@ import me.hsgamer.bettergui.api.requirement.Requirement;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.builder.RequirementBuilder;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
+import me.hsgamer.bettergui.maskedgui.replacer.ValueReplacer;
 import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.bettergui.requirement.RequirementApplier;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
@@ -38,13 +39,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPaginatedMask> {
-    private final Pattern shortcutPattern;
+    private final ValueReplacer<T> valueReplacer;
     private final Map<T, ValueEntry<T>> valueEntryMap = new ConcurrentHashMap<>();
     private final Map<UUID, ValueListCache> playerListCacheMap = new ConcurrentHashMap<>();
     private final Function<Runnable, Task> scheduler;
@@ -58,20 +57,18 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
     protected ValueListMask(Function<Runnable, Task> scheduler, MaskBuilder.Input input) {
         super(input);
         this.scheduler = scheduler;
-        shortcutPattern = Pattern.compile("\\{" + Pattern.quote(getShortcutPatternPrefix()) + "(_([^{}]+))?}");
+        this.valueReplacer = createValueReplacer();
     }
 
     protected ValueListMask(MaskBuilder.Input input) {
         super(input);
         this.scheduler = runnable -> Scheduler.current().async().runTaskTimer(runnable, 0L, valueUpdateTicks);
-        shortcutPattern = Pattern.compile("\\{" + Pattern.quote(getShortcutPatternPrefix()) + "(_([^{}]+))?}");
+        this.valueReplacer = createValueReplacer();
     }
 
-    protected abstract String getShortcutPatternPrefix();
+    protected abstract ValueReplacer<T> createValueReplacer();
 
     protected abstract Stream<T> getValueStream();
-
-    protected abstract String getShortcutReplacement(String argument, T value);
 
     protected abstract String getValueIndicator();
 
@@ -83,39 +80,29 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
 
     protected abstract boolean canViewValue(UUID uuid, T value);
 
-    private String replaceShortcut(String string, T value) {
-        Matcher matcher = shortcutPattern.matcher(string);
-        while (matcher.find()) {
-            String variable = matcher.group(2);
-            String replacement = getShortcutReplacement(variable == null ? "" : variable, value);
-            string = string.replace(matcher.group(), replacement);
-        }
-        return string;
-    }
-
-    private Object replaceShortcut(Object obj, T value) {
+    private Object replace(Object obj, T value) {
         if (obj instanceof String) {
-            return replaceShortcut((String) obj, value);
+            return valueReplacer.replace((String) obj, value);
         } else if (obj instanceof Collection) {
             List<Object> replaceList = new ArrayList<>();
-            ((Collection<?>) obj).forEach(o -> replaceList.add(replaceShortcut(o, value)));
+            ((Collection<?>) obj).forEach(o -> replaceList.add(replace(o, value)));
             return replaceList;
         } else if (obj instanceof Map) {
             // noinspection unchecked, rawtypes
-            ((Map) obj).replaceAll((k, v) -> replaceShortcut(v, value));
+            ((Map) obj).replaceAll((k, v) -> replace(v, value));
         }
         return obj;
     }
 
-    private Map<String, Object> replaceShortcut(Map<String, Object> map, T value) {
+    private Map<String, Object> replace(Map<String, Object> map, T value) {
         Map<String, Object> newMap = new LinkedHashMap<>();
-        map.forEach((k, v) -> newMap.put(k, replaceShortcut(v, value)));
+        map.forEach((k, v) -> newMap.put(k, replace(v, value)));
         return newMap;
     }
 
-    private List<String> replaceShortcut(List<String> list, T value) {
+    private List<String> replace(List<String> list, T value) {
         List<String> newList = new ArrayList<>();
-        list.forEach(s -> newList.add(replaceShortcut(s, value)));
+        list.forEach(s -> newList.add(valueReplacer.replace(s, value)));
         return newList;
     }
 
@@ -124,7 +111,7 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
     }
 
     private ValueEntry<T> newValueEntry(T value) {
-        Map<String, Object> replacedButtonSettings = replaceShortcut(templateButton, value);
+        Map<String, Object> replacedButtonSettings = replace(templateButton, value);
         Button button = ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), String.join("_", getName(), getValueIndicator(), getValueAsString(value), "button"), replacedButtonSettings))
                 .map(Button.class::cast)
                 .orElse(Button.EMPTY);
@@ -133,14 +120,14 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
         Predicate<UUID> viewerPredicate = uuid -> true;
 
         if (!viewerConditionTemplate.isEmpty()) {
-            List<String> replacedViewerConditions = replaceShortcut(viewerConditionTemplate, value);
+            List<String> replacedViewerConditions = replace(viewerConditionTemplate, value);
             ConditionRequirement viewerCondition = new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", String.join("_", getName(), getValueIndicator(), getValueAsString(value), "condition"), replacedViewerConditions));
 
             viewerPredicate = viewerPredicate.and(uuid -> viewerCondition.check(uuid).isSuccess);
         }
 
         if (!viewerRequirementTemplate.isEmpty()) {
-            Map<String, Object> replacedViewerRequirements = replaceShortcut(viewerRequirementTemplate, value);
+            Map<String, Object> replacedViewerRequirements = replace(viewerRequirementTemplate, value);
             RequirementApplier viewerRequirementApplier = new RequirementApplier(getMenu(), String.join("_", getName(), getValueIndicator(), getValueAsString(value), "viewer"), replacedViewerRequirements);
 
             viewerPredicate = viewerPredicate.and(uuid -> {

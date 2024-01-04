@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>MaskedGUI</artifactId>
-    <version>3.0</version>
+    <version>3.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>MaskedGUI</name>
@@ -51,6 +51,7 @@
                             <file>${basedir}/HEADER</file>
                         </licenseHeader>
                     </java>
+                    <ratchetFrom>origin/master</ratchetFrom>
                 </configuration>
             </plugin>
         </plugins>

@@ -15,11 +15,14 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import me.hsgamer.bettergui.api.requirement.Requirement;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.builder.RequirementBuilder;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
+import me.hsgamer.bettergui.requirement.RequirementApplier;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
+import me.hsgamer.bettergui.util.ProcessApplierConstants;
 import me.hsgamer.hscore.bukkit.scheduler.Scheduler;
 import me.hsgamer.hscore.bukkit.scheduler.Task;
 import me.hsgamer.hscore.common.CollectionUtils;
@@ -27,6 +30,7 @@ import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.minecraft.gui.GUIProperties;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
+import me.hsgamer.hscore.task.BatchRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -48,6 +52,7 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
     protected long viewerUpdateMillis = 50L;
     private Map<String, Object> templateButton = Collections.emptyMap();
     private List<String> viewerConditionTemplate = Collections.emptyList();
+    private Map<String, Object> viewerRequirementTemplate = Collections.emptyMap();
     private Task updateTask;
 
     protected ValueListMask(Function<Runnable, Task> scheduler, MaskBuilder.Input input) {
@@ -115,7 +120,7 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
     }
 
     private boolean canView(UUID uuid, ValueEntry<T> valueEntry) {
-        return valueEntry.activated.get() && canViewValue(uuid, valueEntry.value) && valueEntry.viewerCondition.test(uuid);
+        return valueEntry.activated.get() && canViewValue(uuid, valueEntry.value) && valueEntry.viewPredicate.test(uuid);
     }
 
     private ValueEntry<T> newValueEntry(T value) {
@@ -125,9 +130,34 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
                 .orElse(Button.EMPTY);
         button.init();
 
-        List<String> replacedViewerConditions = replaceShortcut(viewerConditionTemplate, value);
-        ConditionRequirement viewerCondition = new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", String.join("_", getName(), getValueIndicator(), getValueAsString(value), "condition"), replacedViewerConditions));
-        return new ValueEntry<>(value, button, uuid1 -> viewerCondition.check(uuid1).isSuccess);
+        Predicate<UUID> viewerPredicate = uuid -> true;
+
+        if (!viewerConditionTemplate.isEmpty()) {
+            List<String> replacedViewerConditions = replaceShortcut(viewerConditionTemplate, value);
+            ConditionRequirement viewerCondition = new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", String.join("_", getName(), getValueIndicator(), getValueAsString(value), "condition"), replacedViewerConditions));
+
+            viewerPredicate = viewerPredicate.and(uuid -> viewerCondition.check(uuid).isSuccess);
+        }
+
+        if (!viewerRequirementTemplate.isEmpty()) {
+            Map<String, Object> replacedViewerRequirements = replaceShortcut(viewerRequirementTemplate, value);
+            RequirementApplier viewerRequirementApplier = new RequirementApplier(getMenu(), String.join("_", getName(), getValueIndicator(), getValueAsString(value), "viewer"), replacedViewerRequirements);
+
+            viewerPredicate = viewerPredicate.and(uuid -> {
+                Requirement.Result result = viewerRequirementApplier.getResult(uuid);
+
+                BatchRunnable batchRunnable = new BatchRunnable();
+                batchRunnable.getTaskPool(ProcessApplierConstants.REQUIREMENT_ACTION_STAGE).addLast(process -> {
+                    result.applier.accept(uuid, process);
+                    process.next();
+                });
+                Scheduler.current().async().runTask(batchRunnable);
+
+                return result.isSuccess;
+            });
+        }
+
+        return new ValueEntry<>(value, button, viewerPredicate);
     }
 
     private List<Button> getPlayerButtons(UUID uuid) {
@@ -159,6 +189,9 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
         viewerConditionTemplate = Optional.ofNullable(MapUtils.getIfFound(section, "viewer-condition"))
                 .map(CollectionUtils::createStringListFromObject)
                 .orElse(Collections.emptyList());
+        viewerRequirementTemplate = Optional.ofNullable(MapUtils.getIfFound(section, "viewer-requirement"))
+                .flatMap(MapUtils::castOptionalStringObjectMap)
+                .orElse(Collections.emptyMap());
         viewerUpdateMillis = Optional.ofNullable(MapUtils.getIfFound(section, "viewer-update-ticks", "viewer-update"))
                 .map(String::valueOf)
                 .map(Long::parseLong)
@@ -206,13 +239,13 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
     private static class ValueEntry<T> {
         final T value;
         final Button button;
-        final Predicate<UUID> viewerCondition;
+        final Predicate<UUID> viewPredicate;
         final AtomicBoolean activated = new AtomicBoolean();
 
-        private ValueEntry(T value, Button button, Predicate<UUID> viewerCondition) {
+        private ValueEntry(T value, Button button, Predicate<UUID> viewPredicate) {
             this.value = value;
             this.button = button;
-            this.viewerCondition = viewerCondition;
+            this.viewPredicate = viewPredicate;
         }
     }
 

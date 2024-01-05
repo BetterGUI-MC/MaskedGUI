@@ -80,6 +80,7 @@ public class FilteredButtonPaginatedMask extends WrappedPaginatedMask<ButtonPagi
                 .stream()
                 .map(button -> {
                     RequirementApplier filterRequirementApplier = null;
+                    // TODO: get button options directly from Map
                     if (button instanceof BaseWrappedButton) {
                         BaseWrappedButton<?> baseWrappedButton = (BaseWrappedButton<?>) button;
                         Map<String, Object> options = baseWrappedButton.getOptions();

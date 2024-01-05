@@ -73,6 +73,7 @@ public final class MaskedGUI implements Expansion, DataFolder, GetPlugin, GetCla
         MaskBuilder.INSTANCE.register(PlayerListMask::new, "player-list", "playerlist", "players");
         MaskBuilder.INSTANCE.register(SimpleValueListMask::new, "simple-value-list", "value-list");
         MaskBuilder.INSTANCE.register(KeyValueListMask::new, "key-value-list", "map-list");
+        MaskBuilder.INSTANCE.register(FilteredButtonPaginatedMask::new, "filtered-button-paginated", "filtered-button-paginate", "filtered-button-pag", "filtered-button-page", "filtered-button-p");
 
         new SpigotVersionChecker(107475).getVersion().whenComplete((output, throwable) -> {
             if (throwable != null) {

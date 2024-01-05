@@ -15,25 +15,25 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
-import me.hsgamer.bettergui.api.requirement.Requirement;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.builder.RequirementBuilder;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.replacer.ValueReplacer;
 import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
+import me.hsgamer.bettergui.maskedgui.util.RequirementUtil;
 import me.hsgamer.bettergui.requirement.RequirementApplier;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
-import me.hsgamer.bettergui.util.ProcessApplierConstants;
 import me.hsgamer.hscore.bukkit.scheduler.Scheduler;
 import me.hsgamer.hscore.bukkit.scheduler.Task;
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.common.MapUtils;
+import me.hsgamer.hscore.common.Validate;
 import me.hsgamer.hscore.minecraft.gui.GUIProperties;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonPaginatedMask;
-import me.hsgamer.hscore.task.BatchRunnable;
 import org.jetbrains.annotations.NotNull;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -133,19 +133,7 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
         if (!viewerRequirementTemplate.isEmpty()) {
             Map<String, Object> replacedViewerRequirements = replace(viewerRequirementTemplate, value);
             RequirementApplier viewerRequirementApplier = new RequirementApplier(getMenu(), String.join("_", getName(), getValueIndicator(), getValueAsString(value), "viewer"), replacedViewerRequirements);
-
-            viewerPredicate = viewerPredicate.and(uuid -> {
-                Requirement.Result result = viewerRequirementApplier.getResult(uuid);
-
-                BatchRunnable batchRunnable = new BatchRunnable();
-                batchRunnable.getTaskPool(ProcessApplierConstants.REQUIREMENT_ACTION_STAGE).addLast(process -> {
-                    result.applier.accept(uuid, process);
-                    process.next();
-                });
-                Scheduler.current().async().runTask(batchRunnable);
-
-                return result.isSuccess;
-            });
+            viewerPredicate = viewerPredicate.and(uuid -> RequirementUtil.check(uuid, viewerRequirementApplier));
         }
 
         return new ValueEntry<>(value, button, viewerPredicate);
@@ -155,8 +143,8 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
         return playerListCacheMap.compute(uuid, (u, cache) -> {
             long now = System.currentTimeMillis();
             if (cache != null) {
-                long remaining = cache.lastUpdate - now;
-                if (remaining > viewerUpdateMillis) {
+                long remaining = now - cache.lastUpdate;
+                if (remaining < viewerUpdateMillis) {
                     return cache;
                 }
             }
@@ -185,7 +173,8 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
                 .orElse(Collections.emptyMap());
         viewerUpdateMillis = Optional.ofNullable(MapUtils.getIfFound(section, "viewer-update-ticks", "viewer-update"))
                 .map(String::valueOf)
-                .map(Long::parseLong)
+                .flatMap(Validate::getNumber)
+                .map(BigDecimal::longValue)
                 .map(ticks -> Math.max(ticks, 1) * GUIProperties.getMillisPerTick())
                 .map(millis -> Math.max(millis, 1L))
                 .orElse(50L);

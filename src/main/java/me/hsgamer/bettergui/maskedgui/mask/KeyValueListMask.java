@@ -52,7 +52,7 @@ public class KeyValueListMask extends ValueListMask<Map<String, String>> {
 
     @Override
     protected String getValueIndicator() {
-        return "key_value";
+        return "key";
     }
 
     @Override

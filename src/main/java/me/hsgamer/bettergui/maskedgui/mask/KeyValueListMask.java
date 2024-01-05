@@ -79,12 +79,12 @@ public class KeyValueListMask extends ValueListMask<Map<String, String>> {
                         Map<?, ?> rawMap = (Map<?, ?>) raw;
                         Map<String, String> map = new HashMap<>();
                         for (Map.Entry<?, ?> entry : rawMap.entrySet()) {
-                            String key = Objects.toString(entry.getKey(), "");
+                            String key = Objects.toString(entry.getKey());
                             Object v = entry.getValue();
                             String value;
                             if (v instanceof Collection) {
                                 List<String> stringList = new ArrayList<>();
-                                ((Collection<?>) v).forEach(o -> stringList.add(Objects.toString(o, "")));
+                                ((Collection<?>) v).forEach(o -> stringList.add(Objects.toString(o)));
                                 value = String.join("\n", stringList);
                             } else {
                                 value = v.toString();

@@ -24,6 +24,7 @@ import me.hsgamer.hscore.minecraft.gui.button.Button;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class ButtonUtil {
     private ButtonUtil() {
@@ -84,6 +85,14 @@ public final class ButtonUtil {
 
         public List<WrappedButton> buttonList() {
             return map.values().stream().map(e -> e.button).collect(Collectors.toList());
+        }
+
+        public Stream<ButtonWithInput> valueStream() {
+            return map.values().stream();
+        }
+
+        public List<ButtonWithInput> list() {
+            return valueStream().collect(Collectors.toList());
         }
     }
 }

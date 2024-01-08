@@ -15,10 +15,9 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
-import me.hsgamer.bettergui.api.button.BaseWrappedButton;
 import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
+import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
 import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.bettergui.maskedgui.util.RequirementUtil;
 import me.hsgamer.bettergui.requirement.RequirementApplier;
@@ -75,21 +74,14 @@ public class FilteredButtonPaginatedMask extends WrappedPaginatedMask<ButtonPagi
                 .map(millis -> Math.max(millis, 1L))
                 .orElse(0L);
 
-        MaskUtil.createChildButtons(this, section)
-                .values()
-                .stream()
-                .map(button -> {
-                    RequirementApplier filterRequirementApplier = null;
-                    // TODO: get button options directly from Map
-                    if (button instanceof BaseWrappedButton) {
-                        BaseWrappedButton<?> baseWrappedButton = (BaseWrappedButton<?>) button;
-                        Map<String, Object> options = baseWrappedButton.getOptions();
-                        filterRequirementApplier = Optional.ofNullable(MapUtils.getIfFound(options, "filter-requirement"))
-                                .flatMap(MapUtils::castOptionalStringObjectMap)
-                                .map(map -> new RequirementApplier(getMenu(), button.getName() + "_filter", map))
-                                .orElse(null);
-                    }
-                    return new ButtonWithFilter(button, filterRequirementApplier);
+        ButtonUtil.createChildButtons(this, section)
+                .valueStream()
+                .map(buttonWithInput -> {
+                    RequirementApplier filterRequirementApplier = Optional.ofNullable(MapUtils.getIfFound(buttonWithInput.input.options, "filter-requirement"))
+                            .flatMap(MapUtils::castOptionalStringObjectMap)
+                            .map(map -> new RequirementApplier(getMenu(), buttonWithInput.input.name + "_filter", map))
+                            .orElse(null);
+                    return new ButtonWithFilter(buttonWithInput.button, filterRequirementApplier);
                 })
                 .forEach(buttonWithFilterList::add);
 

@@ -18,7 +18,7 @@ package me.hsgamer.bettergui.maskedgui.mask;
 import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
+import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.minecraft.gui.mask.MaskUtils;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonMapMask;
@@ -44,7 +44,7 @@ public class PatternMask extends BaseWrappedMask<ButtonMapMask> {
             }
         }
 
-        Map<String, WrappedButton> buttonElements = MaskUtil.createChildButtons(this, section);
+        Map<String, WrappedButton> buttonElements = ButtonUtil.createChildButtons(this, section).buttonMap();
 
         ButtonMapMask mask = new ButtonMapMask(getName());
         for (Map.Entry<String, WrappedButton> entry : buttonElements.entrySet()) {
@@ -60,6 +60,6 @@ public class PatternMask extends BaseWrappedMask<ButtonMapMask> {
 
     @Override
     protected void refresh(ButtonMapMask mask, UUID uuid) {
-        MaskUtil.refreshButtons(uuid, mask.getButtons());
+        ButtonUtil.refreshButtons(uuid, mask.getButtons());
     }
 }

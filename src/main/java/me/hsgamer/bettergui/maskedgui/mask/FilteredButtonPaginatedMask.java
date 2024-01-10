@@ -72,7 +72,7 @@ public class FilteredButtonPaginatedMask extends WrappedPaginatedMask<ButtonPagi
                 .map(BigDecimal::longValue)
                 .map(ticks -> Math.max(ticks, 1) * GUIProperties.getMillisPerTick())
                 .map(millis -> Math.max(millis, 1L))
-                .orElse(0L);
+                .orElse(50L);
 
         ButtonUtil.createChildButtons(this, section)
                 .valueStream()
@@ -83,6 +83,7 @@ public class FilteredButtonPaginatedMask extends WrappedPaginatedMask<ButtonPagi
                             .orElse(null);
                     return new ButtonWithFilter(buttonWithInput.button, filterRequirementApplier);
                 })
+                .peek(buttonWithFilter -> buttonWithFilter.button.init())
                 .forEach(buttonWithFilterList::add);
 
         return new ButtonPaginatedMask(getName(), MultiSlotUtil.getSlots(section)) {

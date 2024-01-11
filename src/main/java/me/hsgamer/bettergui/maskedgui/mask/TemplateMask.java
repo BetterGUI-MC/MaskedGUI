@@ -26,16 +26,23 @@ import java.util.UUID;
 
 public class TemplateMask extends BaseWrappedMask<WrappedMask> {
     private final MaskedGUI addon;
+    private Map<String, Object> finalOptions;
 
     public TemplateMask(MaskedGUI addon, MaskBuilder.Input input) {
         super(input);
         this.addon = addon;
+        this.finalOptions = input.options;
     }
 
     @Override
     protected WrappedMask createMask(Map<String, Object> section) {
-        Map<String, Object> finalMap = addon.getTemplateMaskConfig().getValues(section, "mask");
-        return MaskBuilder.INSTANCE.build(new MaskBuilder.Input(getMenu(), getName(), finalMap)).orElse(null);
+        finalOptions = addon.getTemplateMaskConfig().getValues(section, "mask");
+        return MaskBuilder.INSTANCE.build(new MaskBuilder.Input(getMenu(), getName(), finalOptions)).orElse(null);
+    }
+
+    @Override
+    public Map<String, Object> getOptions() {
+        return finalOptions;
     }
 
     @Override

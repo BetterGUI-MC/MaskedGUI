@@ -18,6 +18,7 @@
     <description>Advanced GUI with Masks</description>
 
     <properties>
+        <core.version>4.3.27</core.version>
         <project.mainClass>me.hsgamer.bettergui.maskedgui.MaskedGUI</project.mainClass>
     </properties>
 
@@ -60,7 +61,7 @@
         <dependency>
             <groupId>me.hsgamer</groupId>
             <artifactId>hscore-minecraft-gui-advanced</artifactId>
-            <version>4.3.25</version>
+            <version>${core.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>me.hsgamer</groupId>
@@ -69,6 +70,26 @@
                 <exclusion>
                     <groupId>me.hsgamer</groupId>
                     <artifactId>hscore-ui</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>me.hsgamer</groupId>
+            <artifactId>hscore-license-spigotmc</artifactId>
+            <version>${core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>me.hsgamer</groupId>
+            <artifactId>hscore-license-polymart</artifactId>
+            <version>${core.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>me.hsgamer</groupId>
+                    <artifactId>hscore-gson</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>me.hsgamer</groupId>
+                    <artifactId>hscore-web</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

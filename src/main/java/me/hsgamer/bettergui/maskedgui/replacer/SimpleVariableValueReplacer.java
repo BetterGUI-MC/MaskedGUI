@@ -25,7 +25,7 @@ public abstract class SimpleVariableValueReplacer<T> extends PatternValueReplace
 
     @Override
     protected Pattern createPattern() {
-        return Pattern.compile("\\{" + Pattern.quote(getPrefix() + "(_([^{}]+))?}"));
+        return Pattern.compile("\\{" + Pattern.quote(getPrefix()) + "(_([^{}]+))?}");
     }
 
     @Override

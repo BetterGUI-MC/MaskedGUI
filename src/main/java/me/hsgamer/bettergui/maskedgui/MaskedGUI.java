@@ -15,6 +15,7 @@
 */
 package me.hsgamer.bettergui.maskedgui;
 
+import me.hsgamer.bettergui.api.addon.GetLogger;
 import me.hsgamer.bettergui.api.addon.GetPlugin;
 import me.hsgamer.bettergui.api.addon.Reloadable;
 import me.hsgamer.bettergui.builder.ActionBuilder;
@@ -36,11 +37,11 @@ import me.hsgamer.hscore.license.common.LicenseChecker;
 import me.hsgamer.hscore.license.common.LicenseResult;
 import me.hsgamer.hscore.license.polymart.PolymartLicenseChecker;
 import me.hsgamer.hscore.license.spigotmc.SpigotLicenseChecker;
+import me.hsgamer.hscore.logger.common.LogLevel;
 
 import java.io.File;
-import java.util.logging.Level;
 
-public final class MaskedGUI implements Expansion, DataFolder, GetPlugin, GetClassLoader, Reloadable {
+public final class MaskedGUI implements Expansion, DataFolder, GetPlugin, GetClassLoader, Reloadable, GetLogger {
     private TemplateConfig templateMaskConfig = new TemplateConfig(new File(getDataFolder(), "template"));
 
     @Override
@@ -82,11 +83,11 @@ public final class MaskedGUI implements Expansion, DataFolder, GetPlugin, GetCla
 
         new SpigotVersionChecker(107475).getVersion().whenComplete((output, throwable) -> {
             if (throwable != null) {
-                getPlugin().getLogger().log(Level.WARNING, "Cannot check the latest version of MaskedGUI", throwable);
+                getLogger().log(LogLevel.WARN, "Cannot check the latest version of MaskedGUI", throwable);
             } else if (this.getExpansionClassLoader().getDescription().getVersion().equalsIgnoreCase(output)) {
-                getPlugin().getLogger().info("You are using the latest version of MaskedGUI");
+                getLogger().log(LogLevel.INFO, "You are using the latest version of MaskedGUI");
             } else {
-                getPlugin().getLogger().warning("You are using an outdated version of MaskedGUI. Please update to " + output);
+                getLogger().log(LogLevel.WARN, "You are using an outdated version of MaskedGUI. Please update to " + output);
             }
         });
 
@@ -97,24 +98,24 @@ public final class MaskedGUI implements Expansion, DataFolder, GetPlugin, GetCla
             LicenseResult result = licenseChecker.checkLicense();
             switch (result.getStatus()) {
                 case VALID:
-                    getPlugin().getLogger().info("Thank you for supporting MaskedGUI. Your support is greatly appreciated");
+                    getLogger().log(LogLevel.INFO, "Thank you for supporting MaskedGUI. Your support is greatly appreciated");
                     break;
                 case INVALID:
-                    getPlugin().getLogger().warning("Thank you for using MaskedGUI");
-                    getPlugin().getLogger().warning("If you like this addon, please consider supporting it by purchasing from one of these platforms:");
-                    getPlugin().getLogger().warning("- SpigotMC: https://www.spigotmc.org/resources/maskedgui.107475/");
-                    getPlugin().getLogger().warning("- Polymart: https://polymart.org/resource/maskedgui.3388");
+                    getLogger().log(LogLevel.WARN, "Thank you for using MaskedGUI");
+                    getLogger().log(LogLevel.WARN, "If you like this addon, please consider supporting it by purchasing from one of these platforms:");
+                    getLogger().log(LogLevel.WARN, "- SpigotMC: https://www.spigotmc.org/resources/maskedgui.107475/");
+                    getLogger().log(LogLevel.WARN, "- Polymart: https://polymart.org/resource/maskedgui.3388");
                     break;
                 case OFFLINE:
-                    getPlugin().getLogger().warning("Cannot check your license for MaskedGUI. Please check your internet connection");
-                    getPlugin().getLogger().warning("Note: You can still use this addon without a license, and there is no limit on the features");
-                    getPlugin().getLogger().warning("However, if you like this addon, please consider supporting it by purchasing it from one of these platforms:");
-                    getPlugin().getLogger().warning("- SpigotMC: https://www.spigotmc.org/resources/maskedgui.107475/");
-                    getPlugin().getLogger().warning("- Polymart: https://polymart.org/resource/maskedgui.3388");
+                    getLogger().log(LogLevel.WARN, "Cannot check your license for MaskedGUI. Please check your internet connection");
+                    getLogger().log(LogLevel.WARN, "Note: You can still use this addon without a license, and there is no limit on the features");
+                    getLogger().log(LogLevel.WARN, "However, if you like this addon, please consider supporting it by purchasing it from one of these platforms:");
+                    getLogger().log(LogLevel.WARN, "- SpigotMC: https://www.spigotmc.org/resources/maskedgui.107475/");
+                    getLogger().log(LogLevel.WARN, "- Polymart: https://polymart.org/resource/maskedgui.3388");
                     break;
                 case UNKNOWN:
-                    getPlugin().getLogger().warning("Cannot check your license for MaskedGUI. Please try again later");
-                    getPlugin().getLogger().warning("Note: You can still use this addon without a license, and there is no limit on the features");
+                    getLogger().log(LogLevel.WARN, "Cannot check your license for MaskedGUI. Please try again later");
+                    getLogger().log(LogLevel.WARN, "Note: You can still use this addon without a license, and there is no limit on the features");
                     break;
             }
         });

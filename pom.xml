@@ -19,6 +19,7 @@
 
     <properties>
         <core.version>4.3.27</core.version>
+        <plugin.version>9.3</plugin.version>
         <project.mainClass>me.hsgamer.bettergui.maskedgui.MaskedGUI</project.mainClass>
     </properties>
 

@@ -25,6 +25,7 @@ import me.hsgamer.bettergui.util.StringReplacerApplier;
 import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.common.Validate;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
+import me.hsgamer.hscore.minecraft.gui.mask.MaskSlot;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -33,7 +34,7 @@ public class ProgressMask implements WrappedMask {
     private final Menu menu;
     private final String name;
     private final Map<String, Object> section;
-    private List<Integer> slots = Collections.emptyList();
+    private MaskSlot maskSlot = MaskSlot.of();
     private String currentValue = "0";
     private String maxValue = "100";
     private Button completeButton = Button.EMPTY;
@@ -54,6 +55,7 @@ public class ProgressMask implements WrappedMask {
     public @NotNull Map<Integer, Button> generateButtons(@NotNull UUID uuid, int size) {
         String parsedCurrentValue = StringReplacerApplier.replace(currentValue, uuid, this);
         String parsedMaxValue = StringReplacerApplier.replace(maxValue, uuid, this);
+        List<Integer> slots = maskSlot.getSlots(uuid);
 
         double current = Validate.getNumber(parsedCurrentValue).map(Number::doubleValue).orElse(0.0);
         double max = Validate.getNumber(parsedMaxValue).map(Number::doubleValue).orElse(100.0);
@@ -91,7 +93,7 @@ public class ProgressMask implements WrappedMask {
     public void init() {
         currentValue = Objects.toString(MapUtils.getIfFoundOrDefault(section, currentValue, "current-value", "current"), currentValue);
         maxValue = Objects.toString(MapUtils.getIfFoundOrDefault(section, maxValue, "max-value", "max"), maxValue);
-        slots = MultiSlotUtil.getSlots(section);
+        maskSlot = MultiSlotUtil.getMaskSlot(section, this);
 
         completeButton = MapUtils.castOptionalStringObjectMap(MapUtils.getIfFound(section, "complete-button", "complete", "current-button"))
                 .flatMap(map -> ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(menu, name + "_complete_button", map)))

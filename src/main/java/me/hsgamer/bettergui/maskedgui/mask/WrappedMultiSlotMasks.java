@@ -31,7 +31,8 @@ public class WrappedMultiSlotMasks extends BaseWrappedMask<MultiSlotsMask> {
 
     @Override
     protected MultiSlotsMask createMask(Map<String, Object> section) {
-        return new MultiSlotsMask(getName(), MultiSlotUtil.getSlots(section)).addButton(ButtonUtil.createChildButtons(this, section).buttonList());
+        return new MultiSlotsMask(getName(), MultiSlotUtil.getMaskSlot(section, this))
+                .addButton(ButtonUtil.createChildButtons(this, section).buttonList());
     }
 
     @Override

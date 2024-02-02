@@ -30,7 +30,8 @@ public class WrappedSequencePaginatedMask extends WrappedPaginatedMask<StaticSeq
 
     @Override
     protected StaticSequencePaginatedMask createPaginatedMask(Map<String, Object> section) {
-        return new StaticSequencePaginatedMask(getName(), MultiSlotUtil.getSlots(section)).addButton(ButtonUtil.createChildButtons(this, section).buttonList());
+        return new StaticSequencePaginatedMask(getName(), MultiSlotUtil.getMaskSlot(section, this))
+                .addButton(ButtonUtil.createChildButtons(this, section).buttonList());
     }
 
     @Override

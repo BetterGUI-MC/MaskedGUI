@@ -86,7 +86,7 @@ public class FilteredButtonPaginatedMask extends WrappedPaginatedMask<ButtonPagi
                 .peek(buttonWithFilter -> buttonWithFilter.button.init())
                 .forEach(buttonWithFilterList::add);
 
-        return new ButtonPaginatedMask(getName(), MultiSlotUtil.getSlots(section)) {
+        return new ButtonPaginatedMask(getName(), MultiSlotUtil.getMaskSlot(section, this)) {
             @Override
             public @NotNull List<@NotNull Button> getButtons(@NotNull UUID uuid) {
                 return getPlayerButtons(uuid);

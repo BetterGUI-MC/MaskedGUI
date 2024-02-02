@@ -183,7 +183,7 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
                 .map(Long::parseLong)
                 .orElse(20L);
         this.configure(section);
-        return new ButtonPaginatedMask(getName(), MultiSlotUtil.getSlots(section)) {
+        return new ButtonPaginatedMask(getName(), MultiSlotUtil.getMaskSlot(section, this)) {
             @Override
             public @NotNull List<@NotNull Button> getButtons(@NotNull UUID uuid) {
                 return getPlayerButtons(uuid);

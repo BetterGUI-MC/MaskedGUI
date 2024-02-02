@@ -30,7 +30,7 @@ public class WrappedButtonPaginatedMask extends WrappedPaginatedMask<StaticButto
 
     @Override
     protected StaticButtonPaginatedMask createPaginatedMask(Map<String, Object> section) {
-        return new StaticButtonPaginatedMask(getName(), MultiSlotUtil.getSlots(section))
+        return new StaticButtonPaginatedMask(getName(), MultiSlotUtil.getMaskSlot(section, this))
                 .addButton(ButtonUtil.createChildButtons(this, section).buttonList());
     }
 

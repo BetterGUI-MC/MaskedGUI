@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class MultiSlotUtil {
     private static final Pattern GRAPH_PATTERN = Pattern.compile("(\\d+)-(\\d+)-(\\d+)-(\\d+)(-[oO])?");
@@ -48,26 +49,17 @@ public class MultiSlotUtil {
                 int x2 = Math.max(1, Integer.parseInt(matcher.group(3))) - 1;
                 int y2 = Math.max(1, Integer.parseInt(matcher.group(4))) - 1;
                 boolean outline = matcher.group(5) != null;
-                List<Integer> slots = new ArrayList<>();
+                IntStream slotStream;
                 if (outline) {
-                    MaskUtils.generateOutlineSlots(x1, y1, x2, y2).forEach(slots::add);
+                    slotStream = MaskUtils.generateOutlineSlots(x1, y1, x2, y2);
                 } else {
-                    MaskUtils.generateAreaSlots(x1, y1, x2, y2).forEach(slots::add);
+                    slotStream = MaskUtils.generateAreaSlots(x1, y1, x2, y2);
                 }
-                return slots;
+                return slotStream.collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
             } else {
                 return SlotUtil.generateSlots(s).collect(Collectors.toList());
             }
         });
-    }
-
-    public static List<Integer> getSlots(Map<String, Object> map) {
-        Optional<String> optionalSlot = Optional.ofNullable(map.get(POS_SLOT)).map(Object::toString);
-        if (optionalSlot.isPresent()) {
-            return getSlots(optionalSlot.get());
-        } else {
-            return SlotUtil.getSlots(map);
-        }
     }
 
     public static MaskSlot getMaskSlot(Map<String, Object> map, MenuElement menuElement) {

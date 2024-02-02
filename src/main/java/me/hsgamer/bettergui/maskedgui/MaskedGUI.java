@@ -16,7 +16,6 @@
 package me.hsgamer.bettergui.maskedgui;
 
 import me.hsgamer.bettergui.api.addon.GetLogger;
-import me.hsgamer.bettergui.api.addon.GetPlugin;
 import me.hsgamer.bettergui.api.addon.Reloadable;
 import me.hsgamer.bettergui.builder.ActionBuilder;
 import me.hsgamer.bettergui.builder.MenuBuilder;
@@ -41,7 +40,7 @@ import me.hsgamer.hscore.logger.common.LogLevel;
 
 import java.io.File;
 
-public final class MaskedGUI implements Expansion, DataFolder, GetPlugin, GetClassLoader, Reloadable, GetLogger {
+public final class MaskedGUI implements Expansion, DataFolder, GetClassLoader, Reloadable, GetLogger {
     private TemplateConfig templateMaskConfig = new TemplateConfig(new File(getDataFolder(), "template"));
 
     @Override

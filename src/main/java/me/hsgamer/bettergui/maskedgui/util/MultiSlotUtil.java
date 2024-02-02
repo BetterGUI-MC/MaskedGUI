@@ -34,6 +34,7 @@ import java.util.stream.IntStream;
 public class MultiSlotUtil {
     private static final Pattern GRAPH_PATTERN = Pattern.compile("(\\d+)-(\\d+)-(\\d+)-(\\d+)(-[oO])?");
     private static final String POS_SLOT = "slot";
+    private static final String POS_DYNAMIC_SLOT = "dynamic-slot";
     private static final Map<String, List<Integer>> cachedSlots = new ConcurrentHashMap<>();
 
     private MultiSlotUtil() {
@@ -63,16 +64,19 @@ public class MultiSlotUtil {
     }
 
     public static MaskSlot getMaskSlot(Map<String, Object> map, MenuElement menuElement) {
-        Optional<String> optionalSlot = Optional.ofNullable(map.get(POS_SLOT)).map(Object::toString);
-        if (optionalSlot.isPresent()) {
-            String rawSlot = optionalSlot.get();
+        Optional<String> optionalDynamicSlot = Optional.ofNullable(map.get(POS_DYNAMIC_SLOT)).map(Object::toString);
+        if (optionalDynamicSlot.isPresent()) {
+            String rawSlot = optionalDynamicSlot.get();
             return uuid -> {
                 String slot = StringReplacerApplier.replace(rawSlot, uuid, menuElement);
                 return getSlots(slot);
             };
-        } else {
-            List<Integer> slots = SlotUtil.getSlots(map);
-            return uuid -> slots;
         }
+
+        List<Integer> slots = Optional.ofNullable(map.get(POS_SLOT))
+                .map(Object::toString)
+                .map(MultiSlotUtil::getSlots)
+                .orElseGet(() -> SlotUtil.getSlots(map));
+        return uuid -> slots;
     }
 }

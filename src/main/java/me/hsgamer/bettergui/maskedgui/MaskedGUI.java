@@ -31,7 +31,6 @@ import me.hsgamer.hscore.bukkit.scheduler.Scheduler;
 import me.hsgamer.hscore.checker.spigotmc.SpigotVersionChecker;
 import me.hsgamer.hscore.expansion.common.Expansion;
 import me.hsgamer.hscore.expansion.extra.expansion.DataFolder;
-import me.hsgamer.hscore.expansion.extra.expansion.GetClassLoader;
 import me.hsgamer.hscore.license.common.LicenseChecker;
 import me.hsgamer.hscore.license.common.LicenseResult;
 import me.hsgamer.hscore.license.polymart.PolymartLicenseChecker;
@@ -40,7 +39,7 @@ import me.hsgamer.hscore.logger.common.LogLevel;
 
 import java.io.File;
 
-public final class MaskedGUI implements Expansion, DataFolder, GetClassLoader, Reloadable, GetLogger {
+public final class MaskedGUI implements Expansion, DataFolder, Reloadable, GetLogger {
     private TemplateConfig templateMaskConfig = new TemplateConfig(new File(getDataFolder(), "template"));
 
     @Override

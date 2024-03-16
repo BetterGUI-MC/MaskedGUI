@@ -92,8 +92,9 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
             ((Collection<?>) obj).forEach(o -> replaceList.add(replace(o, value)));
             return replaceList;
         } else if (obj instanceof Map) {
-            // noinspection unchecked, rawtypes
-            ((Map) obj).replaceAll((k, v) -> replace(v, value));
+            Map<Object, Object> replaceMap = new LinkedHashMap<>();
+            ((Map<?, ?>) obj).forEach((k, v) -> replaceMap.put(k, replace(v, value)));
+            return replaceMap;
         }
         return obj;
     }

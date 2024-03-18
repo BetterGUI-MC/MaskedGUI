@@ -18,7 +18,7 @@
     <description>Advanced GUI with Masks</description>
 
     <properties>
-        <core.version>4.3.29</core.version>
+        <core.version>4.4.0</core.version>
         <plugin.version>9.3</plugin.version>
         <project.mainClass>me.hsgamer.bettergui.maskedgui.MaskedGUI</project.mainClass>
     </properties>

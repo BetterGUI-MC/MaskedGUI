@@ -16,8 +16,8 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
+import me.hsgamer.bettergui.maskedgui.slot.WrappedMaskSlot;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
-import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.StaticButtonPaginatedMask;
 
 import java.util.Map;
@@ -30,7 +30,7 @@ public class WrappedButtonPaginatedMask extends WrappedPaginatedMask<StaticButto
 
     @Override
     protected StaticButtonPaginatedMask createPaginatedMask(Map<String, Object> section) {
-        return new StaticButtonPaginatedMask(getName(), MultiSlotUtil.getMaskSlot(section, this))
+        return new StaticButtonPaginatedMask(getName(), WrappedMaskSlot.of(section, this))
                 .addButton(ButtonUtil.createChildButtons(this, section).buttonList());
     }
 

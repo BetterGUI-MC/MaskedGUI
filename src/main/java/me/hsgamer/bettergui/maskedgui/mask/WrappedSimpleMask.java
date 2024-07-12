@@ -18,8 +18,8 @@ package me.hsgamer.bettergui.maskedgui.mask;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
+import me.hsgamer.bettergui.maskedgui.slot.WrappedMaskSlot;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
-import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.MultiSlotsMask;
 
 import java.util.Map;
@@ -32,7 +32,7 @@ public class WrappedSimpleMask extends BaseWrappedMask<MultiSlotsMask> {
 
     @Override
     protected MultiSlotsMask createMask(Map<String, Object> section) {
-        MultiSlotsMask mask = new MultiSlotsMask(getName(), MultiSlotUtil.getMaskSlot(section, this));
+        MultiSlotsMask mask = new MultiSlotsMask(getName(), WrappedMaskSlot.of(section, this));
         ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), getName() + "_button", section)).ifPresent(mask::addButton);
         return mask;
     }

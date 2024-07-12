@@ -19,7 +19,7 @@ import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.builder.RequirementBuilder;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.replacer.ValueReplacer;
-import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
+import me.hsgamer.bettergui.maskedgui.slot.WrappedMaskSlot;
 import me.hsgamer.bettergui.maskedgui.util.RequirementUtil;
 import me.hsgamer.bettergui.requirement.RequirementApplier;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
@@ -184,7 +184,7 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
                 .map(Long::parseLong)
                 .orElse(20L);
         this.configure(section);
-        return new ButtonPaginatedMask(getName(), MultiSlotUtil.getMaskSlot(section, this)) {
+        return new ButtonPaginatedMask(getName(), WrappedMaskSlot.of(section, this)) {
             @Override
             public @NotNull List<@NotNull Button> getButtons(@NotNull UUID uuid) {
                 return getPlayerButtons(uuid);

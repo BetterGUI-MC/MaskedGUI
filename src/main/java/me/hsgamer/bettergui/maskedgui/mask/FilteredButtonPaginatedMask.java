@@ -17,8 +17,8 @@ package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.api.button.WrappedButton;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
+import me.hsgamer.bettergui.maskedgui.slot.WrappedMaskSlot;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
-import me.hsgamer.bettergui.maskedgui.util.MultiSlotUtil;
 import me.hsgamer.bettergui.maskedgui.util.RequirementUtil;
 import me.hsgamer.bettergui.requirement.RequirementApplier;
 import me.hsgamer.hscore.common.MapUtils;
@@ -86,7 +86,7 @@ public class FilteredButtonPaginatedMask extends WrappedPaginatedMask<ButtonPagi
                 .peek(buttonWithFilter -> buttonWithFilter.button.init())
                 .forEach(buttonWithFilterList::add);
 
-        return new ButtonPaginatedMask(getName(), MultiSlotUtil.getMaskSlot(section, this)) {
+        return new ButtonPaginatedMask(getName(), WrappedMaskSlot.of(section, this)) {
             @Override
             public @NotNull List<@NotNull Button> getButtons(@NotNull UUID uuid) {
                 return getPlayerButtons(uuid);

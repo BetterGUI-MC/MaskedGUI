@@ -21,7 +21,6 @@ import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.menu.BaseInventoryMenu;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
 import me.hsgamer.hscore.common.MapUtils;
-import me.hsgamer.hscore.config.CaseInsensitivePathString;
 import me.hsgamer.hscore.config.Config;
 import me.hsgamer.hscore.minecraft.gui.advanced.AdvancedButtonMap;
 
@@ -37,8 +36,8 @@ public class MaskedMenu extends BaseInventoryMenu<AdvancedButtonMap> {
     @Override
     protected AdvancedButtonMap createButtonMap() {
         AdvancedButtonMap buttonMap = new AdvancedButtonMap();
-        for (Map.Entry<CaseInsensitivePathString, Object> entry : configSettings.entrySet()) {
-            CaseInsensitivePathString key = entry.getKey();
+        for (Map.Entry<String, Object> entry : configSettings.entrySet()) {
+            String key = entry.getKey();
             Optional<Map<String, Object>> optionalValue = MapUtils.castOptionalStringObjectMap(entry.getValue());
             if (!optionalValue.isPresent()) continue;
             Map<String, Object> value = optionalValue.get();

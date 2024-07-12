@@ -17,19 +17,17 @@ package me.hsgamer.bettergui.maskedgui.builder;
 
 import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
-import me.hsgamer.hscore.builder.MassBuilder;
+import me.hsgamer.hscore.builder.FunctionalMassBuilder;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringLinkedMap;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
 
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMask> {
+public final class MaskBuilder extends FunctionalMassBuilder<MaskBuilder.Input, WrappedMask> {
     public static final MaskBuilder INSTANCE = new MaskBuilder();
     private String defaultMaskType = "";
 
@@ -37,21 +35,13 @@ public final class MaskBuilder extends MassBuilder<MaskBuilder.Input, WrappedMas
         super();
     }
 
-    public void setDefaultMaskType(String defaultMaskType) {
-        this.defaultMaskType = defaultMaskType;
+    @Override
+    protected String getType(Input input) {
+        return Objects.toString(new CaseInsensitiveStringMap<>(input.options).get("mask"), defaultMaskType);
     }
 
-    public void register(Function<Input, WrappedMask> creator, String... type) {
-        register(input -> {
-            Map<String, Object> keys = new CaseInsensitiveStringMap<>(input.options);
-            String mask = Objects.toString(keys.get("mask"), defaultMaskType);
-            for (String s : type) {
-                if (mask.equalsIgnoreCase(s)) {
-                    return Optional.of(creator.apply(input));
-                }
-            }
-            return Optional.empty();
-        });
+    public void setDefaultMaskType(String defaultMaskType) {
+        this.defaultMaskType = defaultMaskType;
     }
 
     public Map<String, WrappedMask> getChildMasksAsMap(WrappedMask parentMask, Map<String, Object> section) {

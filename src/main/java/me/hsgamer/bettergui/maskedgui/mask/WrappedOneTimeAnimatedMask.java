@@ -21,11 +21,10 @@ import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.signal.RefreshMaskSignal;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
 import me.hsgamer.bettergui.maskedgui.util.SignalHandler;
+import me.hsgamer.bettergui.util.TickUtil;
 import me.hsgamer.hscore.common.MapUtils;
-import me.hsgamer.hscore.common.Validate;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.OneTimeAnimatedMask;
 
-import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,10 +43,9 @@ public class WrappedOneTimeAnimatedMask extends BaseWrappedMask<OneTimeAnimatedM
 
         Optional.ofNullable(section.get("update"))
                 .map(String::valueOf)
-                .flatMap(Validate::getNumber)
-                .filter(bigDecimal -> bigDecimal.compareTo(BigDecimal.ZERO) > 0)
-                .map(BigDecimal::longValue)
-                .ifPresent(mask::setPeriodTicks);
+                .flatMap(TickUtil::toMillis)
+                .filter(n -> n > 0)
+                .ifPresent(mask::setPeriodMillis);
         Optional.ofNullable(MapUtils.getIfFound(section, "view-last", "keep-last", "last"))
                 .map(String::valueOf)
                 .map(Boolean::parseBoolean)

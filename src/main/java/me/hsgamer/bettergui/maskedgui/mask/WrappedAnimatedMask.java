@@ -16,15 +16,12 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
-import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
-import me.hsgamer.hscore.common.Validate;
+import me.hsgamer.bettergui.util.TickUtil;
 import me.hsgamer.hscore.minecraft.gui.mask.impl.AnimatedMask;
 
-import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,15 +33,16 @@ public class WrappedAnimatedMask extends BaseWrappedMask<AnimatedMask> {
 
     @Override
     protected AnimatedMask createMask(Map<String, Object> section) {
-        long update = Optional.ofNullable(section.get("update"))
-                .map(String::valueOf)
-                .flatMap(Validate::getNumber)
-                .filter(bigDecimal -> bigDecimal.compareTo(BigDecimal.ZERO) > 0)
-                .map(BigDecimal::longValue)
-                .orElse(0L);
+        AnimatedMask mask = new AnimatedMask(getName());
+        mask.addMask(MaskUtil.createChildMasksAsList(this, section));
 
-        List<WrappedMask> frames = MaskUtil.createChildMasksAsList(this, section);
-        return new AnimatedMask(getName()).addMask(frames).setPeriodTicks(update);
+        Optional.ofNullable(section.get("update"))
+                .map(String::valueOf)
+                .flatMap(TickUtil::toMillis)
+                .filter(n -> n > 0)
+                .ifPresent(mask::setPeriodMillis);
+
+        return mask;
     }
 
     @Override

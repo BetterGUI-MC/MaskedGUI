@@ -7,7 +7,7 @@
     <parent>
         <groupId>me.hsgamer.bettergui</groupId>
         <artifactId>addon-parent</artifactId>
-        <version>3.2</version>
+        <version>4.0</version>
     </parent>
 
     <artifactId>MaskedGUI</artifactId>
@@ -18,8 +18,7 @@
     <description>Advanced GUI with Masks</description>
 
     <properties>
-        <core.version>4.3.29</core.version>
-        <plugin.version>9.3</plugin.version>
+        <core.version>4.5.4</core.version>
         <project.mainClass>me.hsgamer.bettergui.maskedgui.MaskedGUI</project.mainClass>
     </properties>
 
@@ -71,6 +70,10 @@
                 <exclusion>
                     <groupId>me.hsgamer</groupId>
                     <artifactId>hscore-ui</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>me.hsgamer</groupId>
+                    <artifactId>hscore-animate</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

@@ -15,7 +15,9 @@
 */
 package me.hsgamer.bettergui.maskedgui;
 
+import io.github.projectunified.minelib.scheduler.async.AsyncScheduler;
 import me.hsgamer.bettergui.api.addon.GetLogger;
+import me.hsgamer.bettergui.api.addon.GetPlugin;
 import me.hsgamer.bettergui.api.addon.Reloadable;
 import me.hsgamer.bettergui.builder.ActionBuilder;
 import me.hsgamer.bettergui.builder.MenuBuilder;
@@ -27,7 +29,6 @@ import me.hsgamer.bettergui.maskedgui.action.SetPageAction;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.mask.*;
 import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
-import me.hsgamer.hscore.bukkit.scheduler.Scheduler;
 import me.hsgamer.hscore.checker.spigotmc.SpigotVersionChecker;
 import me.hsgamer.hscore.expansion.common.Expansion;
 import me.hsgamer.hscore.expansion.extra.expansion.DataFolder;
@@ -39,7 +40,7 @@ import me.hsgamer.hscore.logger.common.LogLevel;
 
 import java.io.File;
 
-public final class MaskedGUI implements Expansion, DataFolder, Reloadable, GetLogger {
+public final class MaskedGUI implements Expansion, DataFolder, Reloadable, GetLogger, GetPlugin {
     private TemplateConfig templateMaskConfig = new TemplateConfig(new File(getDataFolder(), "template"));
 
     @Override
@@ -92,7 +93,7 @@ public final class MaskedGUI implements Expansion, DataFolder, Reloadable, GetLo
         LicenseChecker licenseChecker = PolymartLicenseChecker.isAvailable()
                 ? new PolymartLicenseChecker("3388", true, true)
                 : new SpigotLicenseChecker("107475");
-        Scheduler.current().async().runTask(() -> {
+        AsyncScheduler.get(getPlugin()).run(() -> {
             LicenseResult result = licenseChecker.checkLicense();
             switch (result.getStatus()) {
                 case VALID:

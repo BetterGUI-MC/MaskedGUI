@@ -26,11 +26,11 @@ public class SetMaskAction extends SignalAction {
 
     public SetMaskAction(ActionBuilder.Input input) {
         super(input);
-        signalName = input.option.trim();
+        signalName = input.getOption().trim();
     }
 
     @Override
     protected Signal createSignal(UUID uuid, String value) {
-        return new SetMaskSignal(signalName, getMenu(), value);
+        return new SetMaskSignal(signalName, input.getMenu(), value);
     }
 }

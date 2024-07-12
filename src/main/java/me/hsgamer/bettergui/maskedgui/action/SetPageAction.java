@@ -26,7 +26,7 @@ public class SetPageAction extends SignalAction {
 
     public SetPageAction(ActionBuilder.Input input) {
         super(input);
-        signalName = input.option.trim();
+        signalName = input.getOption().trim();
     }
 
     @Override
@@ -37,6 +37,6 @@ public class SetPageAction extends SignalAction {
         } catch (Exception e) {
             page = 0;
         }
-        return new SetPageSignal(signalName, getMenu(), page);
+        return new SetPageSignal(signalName, input.getMenu(), page);
     }
 }

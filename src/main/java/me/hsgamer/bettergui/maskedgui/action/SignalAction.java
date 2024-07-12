@@ -15,35 +15,37 @@
 */
 package me.hsgamer.bettergui.maskedgui.action;
 
-import me.hsgamer.bettergui.api.action.BaseAction;
 import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.builder.ActionBuilder;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
-import me.hsgamer.hscore.bukkit.scheduler.Scheduler;
+import me.hsgamer.bettergui.util.SchedulerUtil;
+import me.hsgamer.hscore.action.common.Action;
+import me.hsgamer.hscore.common.StringReplacer;
 import me.hsgamer.hscore.task.element.TaskProcess;
 
 import java.util.UUID;
 
-public abstract class SignalAction extends BaseAction {
+public abstract class SignalAction implements Action {
+    protected final ActionBuilder.Input input;
 
     protected SignalAction(ActionBuilder.Input input) {
-        super(input);
+        this.input = input;
     }
 
     protected abstract Signal createSignal(UUID uuid, String value);
 
     @Override
-    public void accept(UUID uuid, TaskProcess process) {
-        String value = getReplacedString(uuid);
-        Menu menu = getMenu();
+    public void apply(UUID uuid, TaskProcess process, StringReplacer stringReplacer) {
+        String value = stringReplacer.replace(input.getValue(), uuid);
+        Menu menu = input.getMenu();
         if (!(menu instanceof MaskedMenu)) {
             process.next();
             return;
         }
         MaskedMenu maskedMenu = (MaskedMenu) menu;
         Signal signal = createSignal(uuid, value);
-        Scheduler.current().sync().runTask(() -> {
+        SchedulerUtil.global().run(() -> {
             maskedMenu.handleSignal(uuid, signal);
             process.next();
         });

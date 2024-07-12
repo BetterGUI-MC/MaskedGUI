@@ -31,6 +31,6 @@ public class NextPageAction extends SignalAction {
 
     @Override
     protected Signal createSignal(UUID uuid, String value) {
-        return new NextPageSignal(value, getMenu(), next);
+        return new NextPageSignal(value, input.getMenu(), next);
     }
 }

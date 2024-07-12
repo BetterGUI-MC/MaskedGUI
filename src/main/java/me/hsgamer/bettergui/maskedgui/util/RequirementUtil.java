@@ -15,11 +15,10 @@
 */
 package me.hsgamer.bettergui.maskedgui.util;
 
-import io.github.projectunified.minelib.scheduler.async.AsyncScheduler;
-import me.hsgamer.bettergui.BetterGUI;
 import me.hsgamer.bettergui.api.requirement.Requirement;
 import me.hsgamer.bettergui.requirement.RequirementApplier;
 import me.hsgamer.bettergui.util.ProcessApplierConstants;
+import me.hsgamer.bettergui.util.SchedulerUtil;
 import me.hsgamer.hscore.task.BatchRunnable;
 
 import java.util.UUID;
@@ -37,7 +36,7 @@ public final class RequirementUtil {
             result.applier.accept(uuid, process);
             process.next();
         });
-        AsyncScheduler.get(BetterGUI.getInstance()).run(batchRunnable);
+        SchedulerUtil.async().run(batchRunnable);
 
         return result.isSuccess;
     }

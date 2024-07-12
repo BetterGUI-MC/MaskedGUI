@@ -73,7 +73,7 @@ public final class MaskedGUI implements Expansion, DataFolder, Reloadable, GetLo
         MaskBuilder.INSTANCE.register(ProgressMask::new, "progress", "prog");
         MaskBuilder.INSTANCE.register(WrappedListMask::new, "list");
         MaskBuilder.INSTANCE.register(WrappedPredicateMask::new, "predicate", "requirement");
-        MaskBuilder.INSTANCE.register(OneTimeAnimatedMask::new, "one-time-animated", "one-time-animate", "one-time-anim", "animated-one-time", "animate-one-time", "anim-one-time", "animated-once", "animate-once", "anim-once");
+        MaskBuilder.INSTANCE.register(WrappedOneTimeAnimatedMask::new, "one-time-animated", "one-time-animate", "one-time-anim", "animated-one-time", "animate-one-time", "anim-one-time", "animated-once", "animate-once", "anim-once");
         MaskBuilder.INSTANCE.register(SwitchMask::new, "switch");
         MaskBuilder.INSTANCE.register(PlayerListMask::new, "player-list", "playerlist", "players");
         MaskBuilder.INSTANCE.register(SimpleValueListMask::new, "simple-value-list", "value-list");

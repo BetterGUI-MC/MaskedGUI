@@ -16,50 +16,82 @@
 package me.hsgamer.bettergui.maskedgui.mask;
 
 import me.hsgamer.bettergui.api.button.WrappedButton;
-import me.hsgamer.bettergui.maskedgui.api.mask.BaseWrappedMask;
+import me.hsgamer.bettergui.api.menu.Menu;
+import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
 import me.hsgamer.hscore.common.CollectionUtils;
-import me.hsgamer.hscore.minecraft.gui.mask.MaskUtils;
-import me.hsgamer.hscore.minecraft.gui.mask.impl.ButtonMapMask;
+import me.hsgamer.hscore.minecraft.gui.button.Button;
+import me.hsgamer.hscore.minecraft.gui.object.InventoryPosition;
+import me.hsgamer.hscore.minecraft.gui.object.InventorySize;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class PatternMask extends BaseWrappedMask<ButtonMapMask> {
+public class PatternMask implements WrappedMask {
+    private final MaskBuilder.Input input;
+    private final Map<InventoryPosition, Button> buttonMap = new HashMap<>();
+
     public PatternMask(MaskBuilder.Input input) {
-        super(input);
+        this.input = input;
     }
 
     @Override
-    protected ButtonMapMask createMask(Map<String, Object> section) {
-        List<String> pattern = CollectionUtils.createStringListFromObject(section.get("pattern"));
-        if (pattern.isEmpty()) return null;
-        Map<Character, List<Integer>> patternMap = new HashMap<>();
+    public Menu getMenu() {
+        return input.menu;
+    }
+
+    @Override
+    public Optional<Map<Integer, Button>> generateButtons(@NotNull UUID uuid, @NotNull InventorySize inventorySize) {
+        Map<Integer, Button> buttons = buttonMap.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey().toSlot(inventorySize), Map.Entry::getValue, (a, b) -> b));
+        return Optional.of(buttons);
+    }
+
+    @Override
+    public @NotNull String getName() {
+        return input.name;
+    }
+
+    @Override
+    public void init() {
+        List<String> pattern = CollectionUtils.createStringListFromObject(input.options.get("pattern"));
+        if (pattern.isEmpty()) return;
+
+        Map<Character, List<InventoryPosition>> patternMap = new HashMap<>();
         for (int y = 0; y < pattern.size(); y++) {
             String line = pattern.get(y);
             for (int x = 0; x < line.length(); x++) {
                 char c = line.charAt(x);
                 c = c == '.' ? ' ' : c;
-                patternMap.computeIfAbsent(c, k -> new ArrayList<>()).add(MaskUtils.toSlot(x, y));
+                patternMap.computeIfAbsent(c, k -> new ArrayList<>()).add(InventoryPosition.of(x, y));
             }
         }
 
-        Map<String, WrappedButton> buttonElements = ButtonUtil.createChildButtons(this, section).buttonMap();
+        Map<String, WrappedButton> buttonElements = ButtonUtil.createChildButtons(this, input.options).buttonMap();
 
-        ButtonMapMask mask = new ButtonMapMask(getName());
         for (Map.Entry<String, WrappedButton> entry : buttonElements.entrySet()) {
             String keyString = entry.getKey();
             char key = keyString.isEmpty() ? ' ' : keyString.charAt(0);
-            List<Integer> slots = patternMap.get(key);
+            List<InventoryPosition> slots = patternMap.get(key);
             if (slots != null) {
-                mask.addButton(entry.getValue(), slots);
+                for (InventoryPosition position : slots) {
+                    buttonMap.put(position, entry.getValue());
+                }
             }
         }
-        return mask;
+
+        buttonMap.values().forEach(Button::init);
     }
 
     @Override
-    protected void refresh(ButtonMapMask mask, UUID uuid) {
-        ButtonUtil.refreshButtons(uuid, mask.getButtons());
+    public void stop() {
+        buttonMap.values().forEach(Button::stop);
+        buttonMap.clear();
+    }
+
+    @Override
+    public void refresh(UUID uuid) {
+        ButtonUtil.refreshButtons(uuid, buttonMap.values());
     }
 }

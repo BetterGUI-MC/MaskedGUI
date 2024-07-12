@@ -26,6 +26,7 @@ import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.common.Validate;
 import me.hsgamer.hscore.minecraft.gui.button.Button;
 import me.hsgamer.hscore.minecraft.gui.mask.MaskSlot;
+import me.hsgamer.hscore.minecraft.gui.object.InventorySize;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -52,10 +53,10 @@ public class ProgressMask implements WrappedMask {
     }
 
     @Override
-    public @NotNull Map<Integer, Button> generateButtons(@NotNull UUID uuid, int size) {
+    public Optional<Map<Integer, Button>> generateButtons(@NotNull UUID uuid, @NotNull InventorySize inventorySize) {
         String parsedCurrentValue = StringReplacerApplier.replace(currentValue, uuid, this);
         String parsedMaxValue = StringReplacerApplier.replace(maxValue, uuid, this);
-        List<Integer> slots = maskSlot.getSlots(uuid);
+        List<Integer> slots = maskSlot.getSlots(uuid, inventorySize);
 
         double current = Validate.getNumber(parsedCurrentValue).map(Number::doubleValue).orElse(0.0);
         double max = Validate.getNumber(parsedMaxValue).map(Number::doubleValue).orElse(100.0);
@@ -71,7 +72,7 @@ public class ProgressMask implements WrappedMask {
         for (int i = completeSize; i < slotsSize; i++) {
             buttonMap.put(slots.get(i), incompleteButton);
         }
-        return buttonMap;
+        return Optional.of(buttonMap);
     }
 
     @Override

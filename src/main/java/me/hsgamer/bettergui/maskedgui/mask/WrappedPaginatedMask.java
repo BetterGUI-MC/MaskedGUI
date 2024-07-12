@@ -38,10 +38,6 @@ public abstract class WrappedPaginatedMask<T extends PaginatedMask> extends Base
             if (getMask() == null) return null;
             return Integer.toString(getMask().getPage(uuid) + 1);
         }));
-        input.menu.getVariableManager().register(getName() + "_max", StringReplacer.of((original, uuid) -> {
-            if (getMask() == null) return null;
-            return Integer.toString(getMask().getPageAmount(uuid));
-        }));
     }
 
     protected abstract T createPaginatedMask(Map<String, Object> section);

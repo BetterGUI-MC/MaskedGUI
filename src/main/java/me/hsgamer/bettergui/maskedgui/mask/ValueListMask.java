@@ -15,6 +15,7 @@
 */
 package me.hsgamer.bettergui.maskedgui.mask;
 
+import io.github.projectunified.minelib.scheduler.common.task.Task;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.builder.RequirementBuilder;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
@@ -23,8 +24,7 @@ import me.hsgamer.bettergui.maskedgui.slot.WrappedMaskSlot;
 import me.hsgamer.bettergui.maskedgui.util.RequirementUtil;
 import me.hsgamer.bettergui.requirement.RequirementApplier;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
-import me.hsgamer.hscore.bukkit.scheduler.Scheduler;
-import me.hsgamer.hscore.bukkit.scheduler.Task;
+import me.hsgamer.bettergui.util.SchedulerUtil;
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.common.Validate;
@@ -62,7 +62,7 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
 
     protected ValueListMask(MaskBuilder.Input input) {
         super(input);
-        this.scheduler = runnable -> Scheduler.current().async().runTaskTimer(runnable, 0L, valueUpdateTicks);
+        this.scheduler = runnable -> SchedulerUtil.async().runTimer(runnable, 0L, valueUpdateTicks);
         this.valueReplacer = createValueReplacer();
     }
 

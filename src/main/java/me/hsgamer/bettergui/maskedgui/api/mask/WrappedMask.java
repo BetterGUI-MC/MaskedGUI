@@ -17,16 +17,12 @@ package me.hsgamer.bettergui.maskedgui.api.mask;
 
 import io.github.projectunified.craftux.common.Element;
 import io.github.projectunified.craftux.common.Mask;
-import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.api.menu.MenuElement;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 
 import java.util.UUID;
 
 public interface WrappedMask extends Mask, Element, MenuElement {
-    @Override
-    Menu getMenu();
-
     String getName();
 
     default void refresh(UUID uuid) {

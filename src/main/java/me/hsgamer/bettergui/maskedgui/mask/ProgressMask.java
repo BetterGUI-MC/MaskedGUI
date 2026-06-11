@@ -20,10 +20,10 @@ import io.github.projectunified.craftux.common.Button;
 import io.github.projectunified.craftux.common.Element;
 import io.github.projectunified.craftux.common.Position;
 import me.hsgamer.bettergui.api.button.WrappedButton;
+import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
 import me.hsgamer.bettergui.maskedgui.util.MaskSlotUtil;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
@@ -37,7 +37,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ProgressMask implements WrappedMask {
-    private final MaskedMenu menu;
+    private final Menu menu;
     private final String name;
     private final Map<String, Object> section;
     private Function<UUID, List<Position>> maskSlot = uuid -> Collections.emptyList();
@@ -53,7 +53,7 @@ public class ProgressMask implements WrappedMask {
     }
 
     @Override
-    public MaskedMenu getMenu() {
+    public Menu getMenu() {
         return menu;
     }
 

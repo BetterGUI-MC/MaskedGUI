@@ -20,9 +20,9 @@ import io.github.projectunified.craftux.common.Button;
 import io.github.projectunified.craftux.common.Element;
 import io.github.projectunified.craftux.common.Position;
 import me.hsgamer.bettergui.api.button.WrappedButton;
+import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
 import me.hsgamer.bettergui.maskedgui.util.ButtonUtil;
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.minecraft.gui.object.InventoryPosition;
@@ -42,7 +42,7 @@ public class PatternMask implements WrappedMask {
     }
 
     @Override
-    public MaskedMenu getMenu() {
+    public Menu getMenu() {
         return input.menu;
     }
 

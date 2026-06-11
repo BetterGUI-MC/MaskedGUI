@@ -17,8 +17,9 @@ package me.hsgamer.bettergui.maskedgui.util;
 
 import io.github.projectunified.craftux.common.Position;
 import io.github.projectunified.craftux.mask.MaskUtils;
+import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.api.menu.MenuElement;
-import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
+import me.hsgamer.bettergui.maskedgui.menu.BaseMaskedMenu;
 import me.hsgamer.bettergui.util.SlotUtil;
 import me.hsgamer.bettergui.util.StringReplacerApplier;
 import me.hsgamer.hscore.common.Validate;
@@ -39,8 +40,8 @@ public class MaskSlotUtil {
     private static final String POS_SLOT = "slot";
     private static final String POS_DYNAMIC_SLOT = "dynamic-slot";
 
-    public static Function<UUID, List<Position>> of(Map<String, Object> settings, MaskedMenu menu) {
-        InventorySize inventorySize = menu.makeFakeInventorySize();
+    public static Function<UUID, List<Position>> of(Map<String, Object> settings, Menu menu) {
+        InventorySize inventorySize = ((BaseMaskedMenu) menu).makeFakeInventorySize();
         List<Function<UUID, List<Position>>> slotFunctions = new ArrayList<>();
         if (settings.containsKey(POS_X) && settings.containsKey(POS_Y)) {
             Optional<Integer> x = Validate.getNumber(String.valueOf(settings.get(POS_X))).map(BigDecimal::intValue);
@@ -76,7 +77,7 @@ public class MaskSlotUtil {
     }
 
     public static Function<UUID, List<Position>> of(Map<String, Object> settings, MenuElement menuElement) {
-        return of(settings, (MaskedMenu) menuElement.getMenu());
+        return of(settings, menuElement.getMenu());
     }
 
     private static List<Position> getSlots(String slot, InventorySize size) {

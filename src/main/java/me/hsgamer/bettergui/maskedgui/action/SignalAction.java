@@ -18,7 +18,8 @@ package me.hsgamer.bettergui.maskedgui.action;
 import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.builder.ActionBuilder;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
-import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
+import me.hsgamer.bettergui.maskedgui.menu.BaseMaskedMenu;
+import me.hsgamer.bettergui.maskedgui.menu.mask.CraftUXButtonMap;
 import me.hsgamer.bettergui.util.SchedulerUtil;
 import me.hsgamer.hscore.action.common.Action;
 import me.hsgamer.hscore.common.StringReplacer;
@@ -39,14 +40,14 @@ public abstract class SignalAction implements Action {
     public void apply(UUID uuid, TaskProcess process, StringReplacer stringReplacer) {
         String value = stringReplacer.replace(input.getValue(), uuid);
         Menu menu = input.getMenu();
-        if (!(menu instanceof MaskedMenu)) {
+        if (!(menu instanceof BaseMaskedMenu)) {
             process.next();
             return;
         }
-        MaskedMenu maskedMenu = (MaskedMenu) menu;
+        CraftUXButtonMap buttonMap = ((BaseMaskedMenu) menu).getButtonMap();
         Signal signal = createSignal(uuid, value);
         SchedulerUtil.global().run(() -> {
-            maskedMenu.handleSignal(uuid, signal);
+            buttonMap.handleSignal(uuid, signal);
             process.next();
         });
     }

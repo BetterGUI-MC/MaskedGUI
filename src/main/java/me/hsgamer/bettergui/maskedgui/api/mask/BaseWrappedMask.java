@@ -19,9 +19,9 @@ import io.github.projectunified.craftux.common.ActionItem;
 import io.github.projectunified.craftux.common.Element;
 import io.github.projectunified.craftux.common.Mask;
 import io.github.projectunified.craftux.common.Position;
+import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,7 +56,7 @@ public abstract class BaseWrappedMask<T extends Mask> implements WrappedMask {
     }
 
     @Override
-    public MaskedMenu getMenu() {
+    public Menu getMenu() {
         return input.menu;
     }
 

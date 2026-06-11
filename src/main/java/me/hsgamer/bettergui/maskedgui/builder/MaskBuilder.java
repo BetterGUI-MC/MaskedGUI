@@ -15,8 +15,8 @@
 */
 package me.hsgamer.bettergui.maskedgui.builder;
 
+import me.hsgamer.bettergui.api.menu.Menu;
 import me.hsgamer.bettergui.maskedgui.api.mask.WrappedMask;
-import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
 import me.hsgamer.hscore.builder.FunctionalMassBuilder;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringLinkedMap;
 import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
@@ -65,11 +65,11 @@ public final class MaskBuilder extends FunctionalMassBuilder<MaskBuilder.Input, 
     }
 
     public static class Input {
-        public final MaskedMenu menu;
+        public final Menu menu;
         public final String name;
         public final Map<String, Object> options;
 
-        public Input(MaskedMenu menu, String name, Map<String, Object> options) {
+        public Input(Menu menu, String name, Map<String, Object> options) {
             this.menu = menu;
             this.name = name;
             this.options = options;

@@ -15,60 +15,27 @@
 */
 package me.hsgamer.bettergui.maskedgui.menu;
 
-import io.github.projectunified.craftux.common.ActionItem;
-import io.github.projectunified.craftux.common.Position;
-import io.github.projectunified.craftux.mask.HybridMask;
-import me.hsgamer.bettergui.maskedgui.api.signal.Signal;
-import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
-import me.hsgamer.bettergui.maskedgui.util.MaskUtil;
+import me.hsgamer.bettergui.maskedgui.menu.mask.CraftUXButtonMap;
 import me.hsgamer.bettergui.menu.BaseInventoryMenu;
-import me.hsgamer.hscore.collections.map.CaseInsensitiveStringMap;
-import me.hsgamer.hscore.common.MapUtils;
 import me.hsgamer.hscore.config.Config;
-import me.hsgamer.hscore.minecraft.gui.button.ButtonMap;
-import me.hsgamer.hscore.minecraft.gui.button.DisplayButton;
-import me.hsgamer.hscore.minecraft.gui.object.InventoryPosition;
 import me.hsgamer.hscore.minecraft.gui.object.InventorySize;
-import me.hsgamer.hscore.minecraft.gui.object.Item;
 import org.bukkit.event.inventory.InventoryType;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.UUID;
 
-public class MaskedMenu extends BaseInventoryMenu<MaskedMenu.CraftUXButtonMap> {
+public class MaskedMenu extends BaseInventoryMenu<CraftUXButtonMap> implements BaseMaskedMenu {
     public MaskedMenu(Config config) {
         super(config);
     }
 
     @Override
     protected CraftUXButtonMap createButtonMap() {
-        CraftUXButtonMap buttonMap = new CraftUXButtonMap();
-        for (Map.Entry<String, Object> entry : configSettings.entrySet()) {
-            String key = entry.getKey();
-            Optional<Map<String, Object>> optionalValue = MapUtils.castOptionalStringObjectMap(entry.getValue());
-            if (!optionalValue.isPresent()) continue;
-            Map<String, Object> value = optionalValue.get();
-            Map<String, Object> values = new CaseInsensitiveStringMap<>(value);
-            MaskBuilder.INSTANCE
-                    .build(new MaskBuilder.Input(this, "mask_" + key, values))
-                    .ifPresent(mask -> {
-                        mask.init();
-                        buttonMap.hybridMask.add(mask);
-                    });
-        }
-        return buttonMap;
+        return BaseMaskedMenu.createButtonMap(configSettings, this);
     }
 
     @Override
     protected void refreshButtonMapOnCreate(CraftUXButtonMap buttonMap, UUID uuid) {
-        MaskUtil.refreshMasks(uuid, buttonMap.hybridMask.getElements());
-    }
-
-    public void handleSignal(UUID uuid, Signal signal) {
-        CraftUXButtonMap buttonMap = getButtonMap();
-        if (buttonMap == null) return;
-        MaskUtil.handleSignal(uuid, buttonMap.hybridMask.getElements(), signal);
+        buttonMap.refresh(uuid);
     }
 
     public int getSlotPerRow() {
@@ -87,6 +54,7 @@ public class MaskedMenu extends BaseInventoryMenu<MaskedMenu.CraftUXButtonMap> {
         }
     }
 
+    @Override
     public InventorySize makeFakeInventorySize() {
         return new InventorySize() {
             @Override
@@ -99,35 +67,5 @@ public class MaskedMenu extends BaseInventoryMenu<MaskedMenu.CraftUXButtonMap> {
                 return MaskedMenu.this.getSlotPerRow();
             }
         };
-    }
-
-    public static class CraftUXButtonMap implements ButtonMap {
-        private final HybridMask hybridMask = new HybridMask();
-
-        @Override
-        public @NotNull Map<@NotNull Integer, @NotNull DisplayButton> getButtons(@NotNull UUID uuid, InventorySize inventorySize) {
-            Map<Position, ActionItem> map = hybridMask.getActionMap(uuid);
-            if (map == null) return Collections.emptyMap();
-            Map<Integer, @NotNull DisplayButton> buttonMap = new HashMap<>();
-            for (Map.Entry<Position, ActionItem> entry : map.entrySet()) {
-                Position position = entry.getKey();
-                ActionItem actionItem = entry.getValue();
-
-                int slot = InventoryPosition.of(position.getX(), position.getY()).toSlot(inventorySize);
-
-                DisplayButton displayButton = new DisplayButton();
-                Object item = actionItem.getItem();
-                if (item instanceof Item) {
-                    displayButton.setItem((Item) item);
-                }
-                Consumer<Object> action = actionItem.getAction();
-                if (action != null) {
-                    displayButton.setAction(action::accept);
-                }
-
-                buttonMap.put(slot, displayButton);
-            }
-            return buttonMap;
-        }
     }
 }

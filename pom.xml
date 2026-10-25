@@ -80,28 +80,16 @@
                                     <shadedPattern>me.hsgamer.bettergui.lib.core</shadedPattern>
                                 </relocation>
 
-                                <!-- MineLib -->
-                                <relocation>
-                                    <pattern>io.github.projectunified.minelib</pattern>
-                                    <shadedPattern>me.hsgamer.bettergui.lib.minelib</shadedPattern>
-                                </relocation>
-
                                 <!-- bStats -->
                                 <relocation>
                                     <pattern>org.bstats</pattern>
                                     <shadedPattern>me.hsgamer.bettergui.lib.bstats</shadedPattern>
                                 </relocation>
 
-                                <!-- MapTemplate -->
+                                <!-- ProjectUnified -->
                                 <relocation>
-                                    <pattern>io.github.projectunified.maptemplate</pattern>
-                                    <shadedPattern>me.hsgamer.bettergui.maskedgui.lib.maptemplate</shadedPattern>
-                                </relocation>
-
-                                <!-- CraftUX -->
-                                <relocation>
-                                    <pattern>io.github.projectunified.craftux</pattern>
-                                    <shadedPattern>me.hsgamer.bettergui.maskedgui.lib.craftux</shadedPattern>
+                                    <pattern>io.github.projectunified</pattern>
+                                    <shadedPattern>me.hsgamer.bettergui.maskedgui.lib.projectunified</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -136,6 +124,11 @@
             <groupId>io.github.projectunified</groupId>
             <artifactId>map-template</artifactId>
             <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.projectunified</groupId>
+            <artifactId>value-venue-core</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>io.github.projectunified</groupId>

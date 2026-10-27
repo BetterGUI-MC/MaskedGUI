@@ -45,21 +45,6 @@ public class KeyValueListMask extends ValueListMask<Map<String, Object>> {
     }
 
     @Override
-    protected String getValueIndicator() {
-        return "key";
-    }
-
-    @Override
-    protected boolean isValueActivated(Map<String, Object> value) {
-        return true;
-    }
-
-    @Override
-    protected boolean canViewValue(UUID uuid, Map<String, Object> value) {
-        return true;
-    }
-
-    @Override
     protected void configure(Map<String, Object> section) {
         valueList = Optional.ofNullable(MapUtils.getIfFound(section, "values", "value"))
                 .filter(List.class::isInstance)

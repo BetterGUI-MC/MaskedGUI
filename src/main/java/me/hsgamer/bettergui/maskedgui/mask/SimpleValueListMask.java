@@ -40,21 +40,6 @@ public class SimpleValueListMask extends ValueListMask<String> {
     }
 
     @Override
-    protected String getValueIndicator() {
-        return "simple";
-    }
-
-    @Override
-    protected boolean isValueActivated(String value) {
-        return true;
-    }
-
-    @Override
-    protected boolean canViewValue(UUID uuid, String value) {
-        return true;
-    }
-
-    @Override
     protected void configure(Map<String, Object> section) {
         valueList = Optional.ofNullable(MapUtils.getIfFound(section, "values", "value"))
                 .map(CollectionUtils::createStringListFromObject)

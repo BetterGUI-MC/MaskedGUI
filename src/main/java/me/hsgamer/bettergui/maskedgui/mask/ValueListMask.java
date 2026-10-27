@@ -64,15 +64,13 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
 
     protected abstract Stream<T> getValueStream();
 
-    protected abstract String getValueIndicator();
-
-    protected String getValueAsString(T value) {
-        return Objects.toString(value);
+    protected boolean isValueActivated(T value) {
+        return true;
     }
 
-    protected abstract boolean isValueActivated(T value);
-
-    protected abstract boolean canViewValue(UUID uuid, T value);
+    protected boolean canViewValue(UUID uuid, T value) {
+        return true;
+    }
 
     protected void configure(Map<String, Object> section) {
         // EMPTY
@@ -106,7 +104,7 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
                 if (valueVenue == null) return Collections.emptyList();
                 long lastUpdate = lastUpdateMap.getOrDefault(uuid, 0L);
                 long now = System.currentTimeMillis();
-                if (now - lastUpdate > valueUpdateMillis) {
+                if (now - lastUpdate > viewerUpdateMillis) {
                     lastUpdateMap.put(uuid, now);
                     valueVenue.update(uuid);
                 }
@@ -141,7 +139,7 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
                         .build();
 
                 Map<String, Object> replacedButtonSettings = MapUtils.castOptionalStringObjectMap(mapTemplate.apply(templateButton)).orElse(templateButton);
-                Button button = ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), String.join("_", getName(), getValueIndicator(), getValueAsString(sourceValue), "button"), replacedButtonSettings))
+                Button button = ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), String.join("_", getName(), Objects.toString(sourceValue), "button"), replacedButtonSettings))
                         .<Button>map(ButtonUtil.CraftUXButton::new)
                         .orElseGet(() -> (uuid, item) -> false);
                 Element.handleIfElement(button, Element::init);
@@ -150,13 +148,13 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
 
                 if (!viewerConditionTemplate.isEmpty()) {
                     List<String> replacedViewerConditions = CollectionUtils.createStringListFromObject(mapTemplate.apply(viewerConditionTemplate));
-                    ConditionRequirement viewerCondition = new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", String.join("_", getName(), getValueIndicator(), getValueAsString(sourceValue), "condition"), replacedViewerConditions));
+                    ConditionRequirement viewerCondition = new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", String.join("_", getName(), Objects.toString(sourceValue), "condition"), replacedViewerConditions));
                     viewerPredicate = viewerPredicate.and(uuid -> viewerCondition.check(uuid).isSuccess);
                 }
 
                 if (!viewerRequirementTemplate.isEmpty()) {
                     Map<String, Object> replacedViewerRequirements = MapUtils.castOptionalStringObjectMap(mapTemplate.apply(viewerRequirementTemplate)).orElse(viewerRequirementTemplate);
-                    RequirementApplier viewerRequirementApplier = new RequirementApplier(getMenu(), String.join("_", getName(), getValueIndicator(), getValueAsString(sourceValue), "viewer"), replacedViewerRequirements);
+                    RequirementApplier viewerRequirementApplier = new RequirementApplier(getMenu(), String.join("_", getName(), Objects.toString(sourceValue), "viewer"), replacedViewerRequirements);
                     viewerPredicate = viewerPredicate.and(uuid -> RequirementUtil.check(uuid, viewerRequirementApplier));
                 }
 

@@ -69,7 +69,7 @@ public class PlayerListMask extends ValueListMask<UUID> {
     @Override
     protected String replace(String input, UUID value) {
         if (input.equals(KEY)) {
-            return "{" + variablePrefix + getValueAsString(value) + ";player}";
+            return "{" + variablePrefix + value + ";player}";
         }
         if (input.startsWith(PREFIX)) {
             String variable = input.substring(PREFIX.length());
@@ -77,7 +77,7 @@ public class PlayerListMask extends ValueListMask<UUID> {
             if (isPAPI) {
                 variable = variable.substring(PAPI_PREFIX.length());
             }
-            return "{" + variablePrefix + getValueAsString(value) + ";" + variable + ";" + isPAPI + "}";
+            return "{" + variablePrefix + value + ";" + variable + ";" + isPAPI + "}";
         }
         return null;
     }
@@ -86,11 +86,6 @@ public class PlayerListMask extends ValueListMask<UUID> {
     protected Stream<UUID> getValueStream() {
         return (viewOffline ? Arrays.stream(Bukkit.getOfflinePlayers()) : Bukkit.getOnlinePlayers().stream())
                 .map(OfflinePlayer::getUniqueId);
-    }
-
-    @Override
-    protected String getValueIndicator() {
-        return "player";
     }
 
     @Override

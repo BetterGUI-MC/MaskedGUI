@@ -178,6 +178,11 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
         valueVenue = null;
     }
 
+    @Override
+    protected void refresh(ButtonPaginatedMask mask, UUID uuid) {
+        ButtonUtil.refreshCraftUXButtons(uuid, mask.getButtons(uuid));
+    }
+
     private static class ButtonEntry<T> {
         final T value;
         final Button button;

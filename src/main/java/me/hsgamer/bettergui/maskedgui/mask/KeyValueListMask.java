@@ -34,17 +34,22 @@ public class KeyValueListMask extends ValueListMask<Map<String, Object>> {
     }
 
     @Override
-    protected Object replace(String input, Map<String, Object> value) {
-        if (!input.startsWith(PREFIX)) {
-            return null;
-        }
-        String key = input.substring(PREFIX.length());
-        return value.getOrDefault(key, "");
-    }
+    protected ValueStream<Map<String, Object>> getValueStream() {
+        return new ValueStream<Map<String, Object>>() {
+            @Override
+            public Object replace(String input, Map<String, Object> value) {
+                if (!input.startsWith(PREFIX)) {
+                    return null;
+                }
+                String key = input.substring(PREFIX.length());
+                return value.getOrDefault(key, "");
+            }
 
-    @Override
-    protected Stream<Map<String, Object>> getValueStream() {
-        return valueList.stream();
+            @Override
+            public Stream<Map<String, Object>> getStream() {
+                return valueList.stream();
+            }
+        };
     }
 
     @Override

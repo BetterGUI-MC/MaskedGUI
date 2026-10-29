@@ -67,35 +67,41 @@ public class PlayerListMask extends ValueListMask<UUID> {
     }
 
     @Override
-    protected String replace(String input, UUID value) {
-        if (input.equals(KEY)) {
-            return "{" + variablePrefix + value + ";player}";
-        }
-        if (input.startsWith(PREFIX)) {
-            String variable = input.substring(PREFIX.length());
-            boolean isPAPI = input.startsWith(PAPI_PREFIX);
-            if (isPAPI) {
-                variable = variable.substring(PAPI_PREFIX.length());
+    protected ValueStream<UUID> getValueStream() {
+        return new ValueStream<UUID>() {
+            @Override
+            public Object replace(String input, UUID value) {
+                if (input.equals(KEY)) {
+                    return "{" + variablePrefix + value + ";player}";
+                }
+                if (input.startsWith(PREFIX)) {
+                    String variable = input.substring(PREFIX.length());
+                    boolean isPAPI = input.startsWith(PAPI_PREFIX);
+                    if (isPAPI) {
+                        variable = variable.substring(PAPI_PREFIX.length());
+                    }
+                    return "{" + variablePrefix + value + ";" + variable + ";" + isPAPI + "}";
+                }
+                return null;
             }
-            return "{" + variablePrefix + value + ";" + variable + ";" + isPAPI + "}";
-        }
-        return null;
-    }
 
-    @Override
-    protected Stream<UUID> getValueStream() {
-        return (viewOffline ? Arrays.stream(Bukkit.getOfflinePlayers()) : Bukkit.getOnlinePlayers().stream())
-                .map(OfflinePlayer::getUniqueId);
-    }
+            @Override
+            public Stream<UUID> getStream() {
+                return (viewOffline ? Arrays.stream(Bukkit.getOfflinePlayers()) : Bukkit.getOnlinePlayers().stream())
+                        .map(OfflinePlayer::getUniqueId);
+            }
 
-    @Override
-    protected boolean isValueActivated(UUID value) {
-        return playerCondition == null || playerCondition.check(value).isSuccess;
-    }
+            @Override
+            public Stream<UUID> getStream(UUID uuid) {
+                Stream<UUID> stream = getStream();
+                return viewSelf ? stream : stream.filter(u -> !u.equals(uuid));
+            }
 
-    @Override
-    protected boolean canViewValue(UUID uuid, UUID value) {
-        return viewSelf || !uuid.equals(value);
+            @Override
+            public boolean isActivated(UUID value) {
+                return playerCondition == null || playerCondition.check(value).isSuccess;
+            }
+        };
     }
 
     @Override

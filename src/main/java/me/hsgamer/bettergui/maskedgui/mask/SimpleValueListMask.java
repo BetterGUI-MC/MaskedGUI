@@ -33,13 +33,18 @@ public class SimpleValueListMask extends ValueListMask<String> {
     }
 
     @Override
-    protected String replace(String input, String value) {
-        return input.equals("current_value") ? value : null;
-    }
+    protected ValueStream<String> getValueStream() {
+        return new ValueStream<String>() {
+            @Override
+            public Object replace(String input, String value) {
+                return input.equals("current_value") ? value : null;
+            }
 
-    @Override
-    protected Stream<String> getValueStream() {
-        return valueList.stream();
+            @Override
+            public Stream<String> getStream() {
+                return valueList.stream();
+            }
+        };
     }
 
     @Override

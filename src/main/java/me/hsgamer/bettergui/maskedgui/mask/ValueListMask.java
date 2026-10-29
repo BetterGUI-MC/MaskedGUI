@@ -60,17 +60,7 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
         super(input);
     }
 
-    protected abstract Object replace(String input, T value);
-
-    protected abstract Stream<T> getValueStream();
-
-    protected boolean isValueActivated(T value) {
-        return true;
-    }
-
-    protected boolean canViewValue(UUID uuid, T value) {
-        return true;
-    }
+    protected abstract ValueStream<T> getValueStream();
 
     protected void configure(Map<String, Object> section) {
         // EMPTY
@@ -116,26 +106,32 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
     @Override
     public void init() {
         super.init();
+        ValueStream<T> valueStream = getValueStream();
         this.valueGenerator = new CachedValueGenerator<UUID, T, ButtonEntry<T>>() {
             @Override
             public Stream<T> getSourceValueStream() {
-                return ValueListMask.this.getValueStream();
+                return valueStream.getStream();
+            }
+
+            @Override
+            public Stream<T> getSourceValueStream(UUID key) {
+                return valueStream.getStream(key);
             }
 
             @Override
             public boolean isSourceValueActivated(T value) {
-                return ValueListMask.this.isValueActivated(value);
+                return valueStream.isActivated(value);
             }
 
             @Override
             public boolean isValueActivated(ButtonEntry<T> value, UUID key) {
-                return ValueListMask.this.canViewValue(key, value.value) && value.viewPredicate.test(key);
+                return value.viewPredicate.test(key);
             }
 
             @Override
             public ButtonEntry<T> mapToFinalValue(T sourceValue) {
                 MapTemplate mapTemplate = MapTemplate.builder()
-                        .setVariableFunction(input -> ValueListMask.this.replace(input, sourceValue))
+                        .setVariableFunction(input -> valueStream.replace(input, sourceValue))
                         .build();
 
                 Map<String, Object> replacedButtonSettings = MapUtils.castOptionalStringObjectMap(mapTemplate.apply(templateButton)).orElse(templateButton);
@@ -181,6 +177,22 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
     @Override
     protected void refresh(ButtonPaginatedMask mask, UUID uuid) {
         ButtonUtil.refreshCraftUXButtons(uuid, mask.getButtons(uuid));
+    }
+
+    public interface ValueStream<T> {
+        Object replace(String input, T value);
+
+        default Stream<T> getStream() {
+            return Stream.empty();
+        }
+
+        default Stream<T> getStream(UUID uuid) {
+            return getStream();
+        }
+
+        default boolean isActivated(T value) {
+            return true;
+        }
     }
 
     private static class ButtonEntry<T> {

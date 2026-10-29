@@ -61,6 +61,15 @@ public final class ButtonUtil {
                 .orElseGet(() -> new ButtonWithInputMap(Collections.emptyMap()));
     }
 
+    public static void refreshCraftUXButton(UUID uuid, io.github.projectunified.craftux.common.Button button) {
+        if (!(button instanceof CraftUXButton)) return;
+        CraftUXButton craftUXButton = (CraftUXButton) button;
+        Button original = craftUXButton.original;
+        if (!(original instanceof WrappedButton)) return;
+        WrappedButton wrappedButton = (WrappedButton) original;
+        wrappedButton.refresh(uuid);
+    }
+
     public static void refreshButtons(UUID uuid, Collection<? extends Button> buttons) {
         buttons.stream()
                 .filter(WrappedButton.class::isInstance)

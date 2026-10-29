@@ -65,7 +65,7 @@ public final class MaskedGUI implements Expansion, DataFolder, Reloadable, GetLo
         MaskBuilder.INSTANCE.register(WrappedMultiSlotMasks::new, "multi-slots", "multislots", "multi-slot", "multislot", "multi");
         MaskBuilder.INSTANCE.register(WrappedAnimatedMask::new, "animated", "animate", "anim");
         MaskBuilder.INSTANCE.register(input -> new TemplateMask(this, input), "template", "temp");
-        MaskBuilder.INSTANCE.register(PatternMask::new, "pattern", "pat");
+        MaskBuilder.INSTANCE.register(WrappedPatternMask::new, "pattern", "pat");
         MaskBuilder.INSTANCE.register(WrappedButtonPaginatedMask::new, "button-paginated", "button-paginate", "button-pag", "button-page", "button-p");
         MaskBuilder.INSTANCE.register(WrappedSequencePaginatedMask::new, "sequence-paginated", "sequence-paginate", "sequence-pag", "sequence-page", "sequence-p");
         MaskBuilder.INSTANCE.register(WrappedMaskPaginatedMask::new, "mask-paginated", "mask-paginate", "mask-pag", "mask-page", "mask-p");

@@ -70,7 +70,7 @@ public final class MaskedGUI implements Expansion, DataFolder, Reloadable, GetLo
         MaskBuilder.INSTANCE.register(WrappedSequencePaginatedMask::new, "sequence-paginated", "sequence-paginate", "sequence-pag", "sequence-page", "sequence-p");
         MaskBuilder.INSTANCE.register(WrappedMaskPaginatedMask::new, "mask-paginated", "mask-paginate", "mask-pag", "mask-page", "mask-p");
         MaskBuilder.INSTANCE.register(WrappedHybridMask::new, "hybrid", "hyb", "combine");
-        MaskBuilder.INSTANCE.register(ProgressMask::new, "progress", "prog");
+        MaskBuilder.INSTANCE.register(WrappedProgressMask::new, "progress", "prog");
         MaskBuilder.INSTANCE.register(WrappedListMask::new, "list");
         MaskBuilder.INSTANCE.register(WrappedPredicateMask::new, "predicate", "requirement");
         MaskBuilder.INSTANCE.register(WrappedOneTimeAnimatedMask::new, "one-time-animated", "one-time-animate", "one-time-anim", "animated-one-time", "animate-one-time", "anim-one-time", "animated-once", "animate-once", "anim-once");

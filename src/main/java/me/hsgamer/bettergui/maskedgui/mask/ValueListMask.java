@@ -19,6 +19,7 @@ import io.github.projectunified.craftux.common.Button;
 import io.github.projectunified.craftux.common.Element;
 import io.github.projectunified.craftux.mask.ButtonPaginatedMask;
 import io.github.projectunified.maptemplate.MapTemplate;
+import io.github.projectunified.maptemplate.VariableStringReplacer;
 import io.github.projectunified.minelib.scheduler.common.task.Task;
 import io.github.projectunified.valuevenue.core.CachedValueGenerator;
 import io.github.projectunified.valuevenue.core.ValueVenue;
@@ -48,9 +49,9 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
 
     protected long valueUpdateMillis = 1000L;
     protected long viewerUpdateMillis = 50L;
-    private Map<String, Object> templateButton = Collections.emptyMap();
-    private List<String> viewerConditionTemplate = Collections.emptyList();
-    private Map<String, Object> viewerRequirementTemplate = Collections.emptyMap();
+    private MapTemplate templateButton;
+    private MapTemplate viewerConditionTemplate;
+    private MapTemplate viewerRequirementTemplate;
 
     private CachedValueGenerator<UUID, T, ButtonEntry<T>> valueGenerator;
     private ValueVenue<UUID, Button> valueVenue;
@@ -70,13 +71,16 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
     protected ButtonPaginatedMask createPaginatedMask(Map<String, Object> section) {
         templateButton = Optional.ofNullable(MapUtils.getIfFound(section, "template", "button"))
                 .flatMap(MapUtils::castOptionalStringObjectMap)
-                .orElse(Collections.emptyMap());
+                .map(MapTemplate::mark)
+                .orElse(null);
         viewerConditionTemplate = Optional.ofNullable(MapUtils.getIfFound(section, "viewer-condition"))
                 .map(CollectionUtils::createStringListFromObject)
-                .orElse(Collections.emptyList());
+                .map(MapTemplate::mark)
+                .orElse(null);
         viewerRequirementTemplate = Optional.ofNullable(MapUtils.getIfFound(section, "viewer-requirement"))
                 .flatMap(MapUtils::castOptionalStringObjectMap)
-                .orElse(Collections.emptyMap());
+                .map(MapTemplate::mark)
+                .orElse(null);
         viewerUpdateMillis = Optional.ofNullable(MapUtils.getIfFound(section, "viewer-update-ticks", "viewer-update"))
                 .map(String::valueOf)
                 .flatMap(TickUtil::toMillis)
@@ -130,11 +134,12 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
 
             @Override
             public ButtonEntry<T> mapToFinalValue(T sourceValue) {
-                MapTemplate mapTemplate = MapTemplate.builder()
+                VariableStringReplacer replacer = VariableStringReplacer.builder()
                         .setVariableFunction(input -> valueStream.replace(input, sourceValue))
                         .build();
-
-                Map<String, Object> replacedButtonSettings = MapUtils.castOptionalStringObjectMap(mapTemplate.apply(templateButton)).orElse(templateButton);
+                Map<String, Object> replacedButtonSettings = templateButton == null
+                        ? Collections.emptyMap()
+                        : MapUtils.castOptionalStringObjectMap(templateButton.apply(replacer)).orElse(Collections.emptyMap());
                 Button button = ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), String.join("_", getName(), Objects.toString(sourceValue), "button"), replacedButtonSettings))
                         .<Button>map(ButtonUtil.CraftUXButton::new)
                         .orElseGet(() -> (uuid, item) -> false);
@@ -142,14 +147,14 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
 
                 Predicate<UUID> viewerPredicate = uuid -> true;
 
-                if (!viewerConditionTemplate.isEmpty()) {
-                    List<String> replacedViewerConditions = CollectionUtils.createStringListFromObject(mapTemplate.apply(viewerConditionTemplate));
+                if (viewerConditionTemplate != null) {
+                    List<String> replacedViewerConditions = CollectionUtils.createStringListFromObject(viewerConditionTemplate.apply(replacer));
                     ConditionRequirement viewerCondition = new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", String.join("_", getName(), Objects.toString(sourceValue), "condition"), replacedViewerConditions));
                     viewerPredicate = viewerPredicate.and(uuid -> viewerCondition.check(uuid).isSuccess);
                 }
 
-                if (!viewerRequirementTemplate.isEmpty()) {
-                    Map<String, Object> replacedViewerRequirements = MapUtils.castOptionalStringObjectMap(mapTemplate.apply(viewerRequirementTemplate)).orElse(viewerRequirementTemplate);
+                if (viewerRequirementTemplate != null) {
+                    Map<String, Object> replacedViewerRequirements = MapUtils.castOptionalStringObjectMap(viewerRequirementTemplate).orElse(Collections.emptyMap());
                     RequirementApplier viewerRequirementApplier = new RequirementApplier(getMenu(), String.join("_", getName(), Objects.toString(sourceValue), "viewer"), replacedViewerRequirements);
                     viewerPredicate = viewerPredicate.and(uuid -> RequirementUtil.check(uuid, viewerRequirementApplier));
                 }

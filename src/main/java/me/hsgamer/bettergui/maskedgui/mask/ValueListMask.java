@@ -44,7 +44,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPaginatedMask> {
+public class ValueListMask<T> extends WrappedPaginatedMask<ButtonPaginatedMask> {
+    private final ValueStream<T> valueStream;
     private final Map<UUID, Long> lastUpdateMap = new ConcurrentHashMap<>();
 
     protected long valueUpdateMillis = 1000L;
@@ -57,14 +58,9 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
     private ValueVenue<UUID, Button> valueVenue;
     private Task updateTask;
 
-    protected ValueListMask(MaskBuilder.Input input) {
+    public ValueListMask(MaskBuilder.Input input, ValueStream<T> valueStream) {
         super(input);
-    }
-
-    protected abstract ValueStream<T> getValueStream();
-
-    protected void configure(Map<String, Object> section) {
-        // EMPTY
+        this.valueStream = valueStream;
     }
 
     @Override
@@ -86,12 +82,11 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
                 .flatMap(TickUtil::toMillis)
                 .filter(n -> n > 0)
                 .orElse(50L);
-        valueUpdateMillis = Optional.ofNullable(MapUtils.getIfFound(section, "value-update-ticks", "value-update"))
+        valueUpdateMillis = Optional.ofNullable(MapUtils.getIfFound(section, "value-update-ticks", "value-update", "player-update-ticks", "player-update"))
                 .map(String::valueOf)
                 .flatMap(TickUtil::toMillis)
                 .filter(n -> n > 0)
                 .orElse(50L);
-        this.configure(section);
         return new ButtonPaginatedMask(MaskSlotUtil.of(section, this)) {
             @Override
             public @NotNull List<Button> getButtons(@NotNull UUID uuid) {
@@ -110,7 +105,6 @@ public abstract class ValueListMask<T> extends WrappedPaginatedMask<ButtonPagina
     @Override
     public void init() {
         super.init();
-        ValueStream<T> valueStream = getValueStream();
         this.valueGenerator = new CachedValueGenerator<UUID, T, ButtonEntry<T>>() {
             @Override
             public Stream<T> getSourceValueStream() {

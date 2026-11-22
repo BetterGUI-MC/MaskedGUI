@@ -28,6 +28,9 @@ import me.hsgamer.bettergui.maskedgui.action.SetMaskAction;
 import me.hsgamer.bettergui.maskedgui.action.SetPageAction;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
 import me.hsgamer.bettergui.maskedgui.mask.*;
+import me.hsgamer.bettergui.maskedgui.mask.stream.KeyValueStream;
+import me.hsgamer.bettergui.maskedgui.mask.stream.PlayerStream;
+import me.hsgamer.bettergui.maskedgui.mask.stream.SimpleValueStream;
 import me.hsgamer.bettergui.maskedgui.menu.MaskedMenu;
 import me.hsgamer.hscore.checker.spigotmc.SpigotVersionChecker;
 import me.hsgamer.hscore.expansion.common.Expansion;
@@ -75,9 +78,9 @@ public final class MaskedGUI implements Expansion, DataFolder, Reloadable, GetLo
         MaskBuilder.INSTANCE.register(WrappedPredicateMask::new, "predicate", "requirement");
         MaskBuilder.INSTANCE.register(WrappedOneTimeAnimatedMask::new, "one-time-animated", "one-time-animate", "one-time-anim", "animated-one-time", "animate-one-time", "anim-one-time", "animated-once", "animate-once", "anim-once");
         MaskBuilder.INSTANCE.register(SwitchMask::new, "switch");
-        MaskBuilder.INSTANCE.register(PlayerListMask::new, "player-list", "playerlist", "players");
-        MaskBuilder.INSTANCE.register(SimpleValueListMask::new, "simple-value-list", "value-list");
-        MaskBuilder.INSTANCE.register(KeyValueListMask::new, "key-value-list", "map-list");
+        MaskBuilder.INSTANCE.register(input -> new ValueListMask<>(input, new PlayerStream(input)), "player-list", "playerlist", "players");
+        MaskBuilder.INSTANCE.register(input -> new ValueListMask<>(input, new SimpleValueStream(input)), "simple-value-list", "value-list");
+        MaskBuilder.INSTANCE.register(input -> new ValueListMask<>(input, new KeyValueStream(input)), "key-value-list", "map-list");
         MaskBuilder.INSTANCE.register(FilteredButtonPaginatedMask::new, "filtered-button-paginated", "filtered-button-paginate", "filtered-button-pag", "filtered-button-page", "filtered-button-p");
 
         new SpigotVersionChecker(107475).getVersion().whenComplete((output, throwable) -> {

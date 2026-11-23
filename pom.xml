@@ -20,6 +20,7 @@
     <properties>
         <core.version>4.5.7</core.version>
         <craftux.version>1.7.1</craftux.version>
+        <valuevenue.version>0.2.0</valuevenue.version>
         <project.mainClass>me.hsgamer.bettergui.maskedgui.MaskedGUI</project.mainClass>
     </properties>
 
@@ -128,7 +129,17 @@
         <dependency>
             <groupId>io.github.projectunified</groupId>
             <artifactId>value-venue-core</artifactId>
-            <version>0.1.0</version>
+            <version>${valuevenue.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.projectunified</groupId>
+            <artifactId>value-venue-common</artifactId>
+            <version>${valuevenue.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.projectunified</groupId>
+            <artifactId>value-venue-bukkit</artifactId>
+            <version>${valuevenue.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.projectunified</groupId>

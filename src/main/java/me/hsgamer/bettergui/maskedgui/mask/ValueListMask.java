@@ -21,7 +21,11 @@ import io.github.projectunified.craftux.mask.ButtonPaginatedMask;
 import io.github.projectunified.maptemplate.MapTemplate;
 import io.github.projectunified.maptemplate.VariableStringReplacer;
 import io.github.projectunified.minelib.scheduler.common.task.Task;
+import io.github.projectunified.valuevenue.bukkit.BukkitPlayerSource;
+import io.github.projectunified.valuevenue.common.KeyValueSource;
+import io.github.projectunified.valuevenue.common.SimpleValueSource;
 import io.github.projectunified.valuevenue.core.CachedValueGenerator;
+import io.github.projectunified.valuevenue.core.ValueSource;
 import io.github.projectunified.valuevenue.core.ValueVenue;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.builder.RequirementBuilder;
@@ -32,9 +36,11 @@ import me.hsgamer.bettergui.maskedgui.util.RequirementUtil;
 import me.hsgamer.bettergui.requirement.RequirementApplier;
 import me.hsgamer.bettergui.requirement.type.ConditionRequirement;
 import me.hsgamer.bettergui.util.SchedulerUtil;
+import me.hsgamer.bettergui.util.StringReplacerApplier;
 import me.hsgamer.bettergui.util.TickUtil;
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.common.MapUtils;
+import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -45,7 +51,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ValueListMask<T> extends WrappedPaginatedMask<ButtonPaginatedMask> {
-    private final ValueStream<T> valueStream;
+    private final ValueSource<UUID, T> valueSource;
     private final Map<UUID, Long> lastUpdateMap = new ConcurrentHashMap<>();
 
     protected long valueUpdateMillis = 1000L;
@@ -58,9 +64,78 @@ public class ValueListMask<T> extends WrappedPaginatedMask<ButtonPaginatedMask> 
     private ValueVenue<UUID, Button> valueVenue;
     private Task updateTask;
 
-    public ValueListMask(MaskBuilder.Input input, ValueStream<T> valueStream) {
+    public ValueListMask(MaskBuilder.Input input, ValueSource<UUID, T> valueSource) {
         super(input);
-        this.valueStream = valueStream;
+        this.valueSource = valueSource;
+    }
+
+    public static SimpleValueSource simpleValueSource(MaskBuilder.Input input) {
+        List<String> valueList = Optional.ofNullable(MapUtils.getIfFound(input.options, "values", "value"))
+                .map(CollectionUtils::createStringListFromObject)
+                .orElse(Collections.emptyList());
+        return new SimpleValueSource(valueList);
+    }
+
+    public static KeyValueSource keyValueSource(MaskBuilder.Input input) {
+        List<Map<String, Object>> valueList = Optional.ofNullable(MapUtils.getIfFound(input.options, "values", "value"))
+                .filter(List.class::isInstance)
+                .<List<?>>map(List.class::cast)
+                .orElse(Collections.emptyList())
+                .stream()
+                .flatMap(o -> MapUtils.castOptionalStringObjectMap(o, false).map(Stream::of).orElseGet(Stream::empty))
+                .collect(Collectors.toList());
+        return new KeyValueSource(valueList);
+    }
+
+    public static BukkitPlayerSource playerSource(MaskBuilder.Input input) {
+        String variablePrefix = input.name + "_current_";
+        input.menu.getVariableManager().register(variablePrefix, original -> {
+            String[] split = original.split(";", 3);
+            if (split.length < 2) {
+                return null;
+            }
+            UUID targetId;
+            try {
+                targetId = UUID.fromString(split[0]);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+            String variable = split[1];
+            boolean isPAPI = split.length == 3 && Boolean.parseBoolean(split[2]);
+            String finalVariable;
+            if (isPAPI) {
+                finalVariable = "%" + variable + "%";
+            } else {
+                finalVariable = "{" + variable + "}";
+            }
+            return StringReplacerApplier.replace(finalVariable, targetId, input.menu);
+        });
+
+        Map<String, Object> section = input.options;
+        boolean viewSelf = Optional.ofNullable(MapUtils.getIfFound(section, "view-self", "self"))
+                .map(String::valueOf)
+                .map(Boolean::parseBoolean)
+                .orElse(true);
+        boolean viewOffline = Optional.ofNullable(MapUtils.getIfFound(section, "view-offline", "offline"))
+                .map(String::valueOf)
+                .map(Boolean::parseBoolean)
+                .orElse(false);
+        ConditionRequirement playerCondition = Optional.ofNullable(MapUtils.getIfFound(section, "player-condition"))
+                .map(o -> new ConditionRequirement(new RequirementBuilder.Input(input.menu, "condition", input.name + "_player_condition", o)))
+                .orElse(null);
+
+        return new BukkitPlayerSource(viewSelf, viewOffline, player -> playerCondition == null || playerCondition.check(player.getUniqueId()).isSuccess) {
+            private static final String PAPI_PREFIX = "papi_";
+
+            @Override
+            protected Object replaceVariable(String variable, OfflinePlayer value) {
+                boolean isPAPI = variable.startsWith(PAPI_PREFIX);
+                if (isPAPI) {
+                    variable = variable.substring(PAPI_PREFIX.length());
+                }
+                return "{" + variablePrefix + value + ";" + variable + ";" + isPAPI + "}";
+            }
+        };
     }
 
     @Override
@@ -105,57 +180,38 @@ public class ValueListMask<T> extends WrappedPaginatedMask<ButtonPaginatedMask> 
     @Override
     public void init() {
         super.init();
-        this.valueGenerator = new CachedValueGenerator<UUID, T, ButtonEntry<T>>() {
-            @Override
-            public Stream<T> getSourceValueStream() {
-                return valueStream.getStream();
-            }
+        this.valueGenerator = CachedValueGenerator.create(
+                valueSource,
+                (sourceValue, variableReplacer) -> {
+                    VariableStringReplacer replacer = VariableStringReplacer.builder()
+                            .setVariableFunction(variableReplacer)
+                            .build();
+                    Map<String, Object> replacedButtonSettings = templateButton == null
+                            ? Collections.emptyMap()
+                            : MapUtils.castOptionalStringObjectMap(templateButton.apply(replacer)).orElse(Collections.emptyMap());
+                    Button button = ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), String.join("_", getName(), Objects.toString(sourceValue), "button"), replacedButtonSettings))
+                            .<Button>map(ButtonUtil.CraftUXButton::new)
+                            .orElseGet(() -> (uuid, item) -> false);
+                    Element.handleIfElement(button, Element::init);
 
-            @Override
-            public Stream<T> getSourceValueStream(UUID key) {
-                return valueStream.getStream(key);
-            }
+                    Predicate<UUID> viewerPredicate = uuid -> true;
 
-            @Override
-            public boolean isSourceValueActivated(T value) {
-                return valueStream.isActivated(value);
-            }
+                    if (viewerConditionTemplate != null) {
+                        List<String> replacedViewerConditions = CollectionUtils.createStringListFromObject(viewerConditionTemplate.apply(replacer));
+                        ConditionRequirement viewerCondition = new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", String.join("_", getName(), Objects.toString(sourceValue), "condition"), replacedViewerConditions));
+                        viewerPredicate = viewerPredicate.and(uuid -> viewerCondition.check(uuid).isSuccess);
+                    }
 
-            @Override
-            public boolean isValueActivated(ButtonEntry<T> value, UUID key) {
-                return value.viewPredicate.test(key);
-            }
+                    if (viewerRequirementTemplate != null) {
+                        Map<String, Object> replacedViewerRequirements = MapUtils.castOptionalStringObjectMap(viewerRequirementTemplate).orElse(Collections.emptyMap());
+                        RequirementApplier viewerRequirementApplier = new RequirementApplier(getMenu(), String.join("_", getName(), Objects.toString(sourceValue), "viewer"), replacedViewerRequirements);
+                        viewerPredicate = viewerPredicate.and(uuid -> RequirementUtil.check(uuid, viewerRequirementApplier));
+                    }
 
-            @Override
-            public ButtonEntry<T> mapToFinalValue(T sourceValue) {
-                VariableStringReplacer replacer = VariableStringReplacer.builder()
-                        .setVariableFunction(input -> valueStream.replace(input, sourceValue))
-                        .build();
-                Map<String, Object> replacedButtonSettings = templateButton == null
-                        ? Collections.emptyMap()
-                        : MapUtils.castOptionalStringObjectMap(templateButton.apply(replacer)).orElse(Collections.emptyMap());
-                Button button = ButtonBuilder.INSTANCE.build(new ButtonBuilder.Input(getMenu(), String.join("_", getName(), Objects.toString(sourceValue), "button"), replacedButtonSettings))
-                        .<Button>map(ButtonUtil.CraftUXButton::new)
-                        .orElseGet(() -> (uuid, item) -> false);
-                Element.handleIfElement(button, Element::init);
-
-                Predicate<UUID> viewerPredicate = uuid -> true;
-
-                if (viewerConditionTemplate != null) {
-                    List<String> replacedViewerConditions = CollectionUtils.createStringListFromObject(viewerConditionTemplate.apply(replacer));
-                    ConditionRequirement viewerCondition = new ConditionRequirement(new RequirementBuilder.Input(getMenu(), "condition", String.join("_", getName(), Objects.toString(sourceValue), "condition"), replacedViewerConditions));
-                    viewerPredicate = viewerPredicate.and(uuid -> viewerCondition.check(uuid).isSuccess);
-                }
-
-                if (viewerRequirementTemplate != null) {
-                    Map<String, Object> replacedViewerRequirements = MapUtils.castOptionalStringObjectMap(viewerRequirementTemplate).orElse(Collections.emptyMap());
-                    RequirementApplier viewerRequirementApplier = new RequirementApplier(getMenu(), String.join("_", getName(), Objects.toString(sourceValue), "viewer"), replacedViewerRequirements);
-                    viewerPredicate = viewerPredicate.and(uuid -> RequirementUtil.check(uuid, viewerRequirementApplier));
-                }
-
-                return new ButtonEntry<>(sourceValue, button, viewerPredicate);
-            }
-        };
+                    return new ButtonEntry<>(sourceValue, button, viewerPredicate);
+                },
+                (value, key) -> value.viewPredicate.test(key)
+        );
         updateTask = SchedulerUtil.async().runTimer(valueGenerator::update, 0, valueUpdateMillis, TimeUnit.MILLISECONDS);
         this.valueVenue = new ValueVenue<>(valueGenerator.andThen(entryList -> entryList.stream().map(entry -> entry.button).collect(Collectors.toList())));
     }
@@ -176,22 +232,6 @@ public class ValueListMask<T> extends WrappedPaginatedMask<ButtonPaginatedMask> 
     @Override
     protected void refresh(ButtonPaginatedMask mask, UUID uuid) {
         ButtonUtil.refreshCraftUXButtons(uuid, mask.getButtons(uuid));
-    }
-
-    public interface ValueStream<T> {
-        Object replace(String input, T value);
-
-        default Stream<T> getStream() {
-            return Stream.empty();
-        }
-
-        default Stream<T> getStream(UUID uuid) {
-            return getStream();
-        }
-
-        default boolean isActivated(T value) {
-            return true;
-        }
     }
 
     private static class ButtonEntry<T> {

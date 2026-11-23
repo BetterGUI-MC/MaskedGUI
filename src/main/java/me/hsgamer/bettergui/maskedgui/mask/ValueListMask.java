@@ -70,75 +70,6 @@ public class ValueListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
         this.valueSource = valueSource.valueSource(input);
     }
 
-    public static SimpleValueSource simpleValueSource(MaskBuilder.Input input) {
-        List<String> valueList = Optional.ofNullable(MapUtils.getIfFound(input.options, "values", "value"))
-                .map(CollectionUtils::createStringListFromObject)
-                .orElse(Collections.emptyList());
-        return new SimpleValueSource(valueList);
-    }
-
-    public static KeyValueSource keyValueSource(MaskBuilder.Input input) {
-        List<Map<String, Object>> valueList = Optional.ofNullable(MapUtils.getIfFound(input.options, "values", "value"))
-                .filter(List.class::isInstance)
-                .<List<?>>map(List.class::cast)
-                .orElse(Collections.emptyList())
-                .stream()
-                .flatMap(o -> MapUtils.castOptionalStringObjectMap(o, false).map(Stream::of).orElseGet(Stream::empty))
-                .collect(Collectors.toList());
-        return new KeyValueSource(valueList);
-    }
-
-    public static BukkitPlayerSource playerSource(MaskBuilder.Input input) {
-        String variablePrefix = input.name + "_current_";
-        input.menu.getVariableManager().register(variablePrefix, original -> {
-            String[] split = original.split(";", 3);
-            if (split.length < 2) {
-                return null;
-            }
-            UUID targetId;
-            try {
-                targetId = UUID.fromString(split[0]);
-            } catch (IllegalArgumentException e) {
-                return null;
-            }
-            String variable = split[1];
-            boolean isPAPI = split.length == 3 && Boolean.parseBoolean(split[2]);
-            String finalVariable;
-            if (isPAPI) {
-                finalVariable = "%" + variable + "%";
-            } else {
-                finalVariable = "{" + variable + "}";
-            }
-            return StringReplacerApplier.replace(finalVariable, targetId, input.menu);
-        });
-
-        Map<String, Object> section = input.options;
-        boolean viewSelf = Optional.ofNullable(MapUtils.getIfFound(section, "view-self", "self"))
-                .map(String::valueOf)
-                .map(Boolean::parseBoolean)
-                .orElse(true);
-        boolean viewOffline = Optional.ofNullable(MapUtils.getIfFound(section, "view-offline", "offline"))
-                .map(String::valueOf)
-                .map(Boolean::parseBoolean)
-                .orElse(false);
-        ConditionRequirement playerCondition = Optional.ofNullable(MapUtils.getIfFound(section, "player-condition"))
-                .map(o -> new ConditionRequirement(new RequirementBuilder.Input(input.menu, "condition", input.name + "_player_condition", o)))
-                .orElse(null);
-
-        return new BukkitPlayerSource(viewSelf, viewOffline, player -> playerCondition == null || playerCondition.check(player.getUniqueId()).isSuccess) {
-            private static final String PAPI_PREFIX = "papi_";
-
-            @Override
-            protected Object replaceVariable(String variable, OfflinePlayer value) {
-                boolean isPAPI = variable.startsWith(PAPI_PREFIX);
-                if (isPAPI) {
-                    variable = variable.substring(PAPI_PREFIX.length());
-                }
-                return "{" + variablePrefix + value + ";" + variable + ";" + isPAPI + "}";
-            }
-        };
-    }
-
     @Override
     protected ButtonPaginatedMask createPaginatedMask(Map<String, Object> section) {
         templateButton = Optional.ofNullable(MapUtils.getIfFound(section, "template", "button"))
@@ -240,7 +171,7 @@ public class ValueListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
             List<String> valueList = Optional.ofNullable(MapUtils.getIfFound(input.options, "values", "value"))
                     .map(CollectionUtils::createStringListFromObject)
                     .orElse(Collections.emptyList());
-            return new SimpleValueSource(valueList);
+            return new SimpleValueSource<>(valueList, s -> s);
         }),
         KEY_VALUE(input -> {
             List<Map<String, Object>> valueList = Optional.ofNullable(MapUtils.getIfFound(input.options, "values", "value"))
@@ -250,7 +181,7 @@ public class ValueListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
                     .stream()
                     .flatMap(o -> MapUtils.castOptionalStringObjectMap(o, false).map(Stream::of).orElseGet(Stream::empty))
                     .collect(Collectors.toList());
-            return new KeyValueSource(valueList);
+            return new KeyValueSource<>(valueList);
         }),
         PLAYER(input -> {
             String variablePrefix = input.name + "_current_";
@@ -289,7 +220,11 @@ public class ValueListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
                     .map(o -> new ConditionRequirement(new RequirementBuilder.Input(input.menu, "condition", input.name + "_player_condition", o)))
                     .orElse(null);
 
-            return new BukkitPlayerSource(viewSelf, viewOffline, player -> playerCondition == null || playerCondition.check(player.getUniqueId()).isSuccess) {
+            return new BukkitPlayerSource<UUID>(
+                    viewOffline,
+                    playerCondition == null ? null : player -> playerCondition.check(player.getUniqueId()).isSuccess,
+                    viewSelf ? null : (player, key) -> !Objects.equals(player.getUniqueId(), key)
+            ) {
                 private static final String PAPI_PREFIX = "papi_";
 
                 @Override

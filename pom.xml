@@ -20,7 +20,7 @@
     <properties>
         <core.version>4.5.7</core.version>
         <craftux.version>1.7.1</craftux.version>
-        <valuevenue.version>0.2.0</valuevenue.version>
+        <valuevenue.version>0.3.0</valuevenue.version>
         <project.mainClass>me.hsgamer.bettergui.maskedgui.MaskedGUI</project.mainClass>
     </properties>
 

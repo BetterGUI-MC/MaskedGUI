@@ -46,12 +46,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ValueListMask<T> extends WrappedPaginatedMask<ButtonPaginatedMask> {
-    private final ValueSource<UUID, T> valueSource;
+public class ValueListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
+    private final ValueSource<UUID, ?> valueSource;
     private final Map<UUID, Long> lastUpdateMap = new ConcurrentHashMap<>();
 
     protected long valueUpdateMillis = 1000L;
@@ -60,13 +61,13 @@ public class ValueListMask<T> extends WrappedPaginatedMask<ButtonPaginatedMask> 
     private MapTemplate viewerConditionTemplate;
     private MapTemplate viewerRequirementTemplate;
 
-    private CachedValueGenerator<UUID, T, ButtonEntry<T>> valueGenerator;
+    private CachedValueGenerator<UUID, ?, ButtonEntry> valueGenerator;
     private ValueVenue<UUID, Button> valueVenue;
     private Task updateTask;
 
-    public ValueListMask(MaskBuilder.Input input, ValueSource<UUID, T> valueSource) {
+    public ValueListMask(MaskBuilder.Input input, ValueSources valueSource) {
         super(input);
-        this.valueSource = valueSource;
+        this.valueSource = valueSource.valueSource(input);
     }
 
     public static SimpleValueSource simpleValueSource(MaskBuilder.Input input) {
@@ -208,7 +209,7 @@ public class ValueListMask<T> extends WrappedPaginatedMask<ButtonPaginatedMask> 
                         viewerPredicate = viewerPredicate.and(uuid -> RequirementUtil.check(uuid, viewerRequirementApplier));
                     }
 
-                    return new ButtonEntry<>(sourceValue, button, viewerPredicate);
+                    return new ButtonEntry(sourceValue, button, viewerPredicate);
                 },
                 (value, key) -> value.viewPredicate.test(key)
         );
@@ -234,12 +235,90 @@ public class ValueListMask<T> extends WrappedPaginatedMask<ButtonPaginatedMask> 
         ButtonUtil.refreshCraftUXButtons(uuid, mask.getButtons(uuid));
     }
 
-    private static class ButtonEntry<T> {
-        final T value;
+    public enum ValueSources {
+        SIMPLE(input -> {
+            List<String> valueList = Optional.ofNullable(MapUtils.getIfFound(input.options, "values", "value"))
+                    .map(CollectionUtils::createStringListFromObject)
+                    .orElse(Collections.emptyList());
+            return new SimpleValueSource(valueList);
+        }),
+        KEY_VALUE(input -> {
+            List<Map<String, Object>> valueList = Optional.ofNullable(MapUtils.getIfFound(input.options, "values", "value"))
+                    .filter(List.class::isInstance)
+                    .<List<?>>map(List.class::cast)
+                    .orElse(Collections.emptyList())
+                    .stream()
+                    .flatMap(o -> MapUtils.castOptionalStringObjectMap(o, false).map(Stream::of).orElseGet(Stream::empty))
+                    .collect(Collectors.toList());
+            return new KeyValueSource(valueList);
+        }),
+        PLAYER(input -> {
+            String variablePrefix = input.name + "_current_";
+            input.menu.getVariableManager().register(variablePrefix, original -> {
+                String[] split = original.split(";", 3);
+                if (split.length < 2) {
+                    return null;
+                }
+                UUID targetId;
+                try {
+                    targetId = UUID.fromString(split[0]);
+                } catch (IllegalArgumentException e) {
+                    return null;
+                }
+                String variable = split[1];
+                boolean isPAPI = split.length == 3 && Boolean.parseBoolean(split[2]);
+                String finalVariable;
+                if (isPAPI) {
+                    finalVariable = "%" + variable + "%";
+                } else {
+                    finalVariable = "{" + variable + "}";
+                }
+                return StringReplacerApplier.replace(finalVariable, targetId, input.menu);
+            });
+
+            Map<String, Object> section = input.options;
+            boolean viewSelf = Optional.ofNullable(MapUtils.getIfFound(section, "view-self", "self"))
+                    .map(String::valueOf)
+                    .map(Boolean::parseBoolean)
+                    .orElse(true);
+            boolean viewOffline = Optional.ofNullable(MapUtils.getIfFound(section, "view-offline", "offline"))
+                    .map(String::valueOf)
+                    .map(Boolean::parseBoolean)
+                    .orElse(false);
+            ConditionRequirement playerCondition = Optional.ofNullable(MapUtils.getIfFound(section, "player-condition"))
+                    .map(o -> new ConditionRequirement(new RequirementBuilder.Input(input.menu, "condition", input.name + "_player_condition", o)))
+                    .orElse(null);
+
+            return new BukkitPlayerSource(viewSelf, viewOffline, player -> playerCondition == null || playerCondition.check(player.getUniqueId()).isSuccess) {
+                private static final String PAPI_PREFIX = "papi_";
+
+                @Override
+                protected Object replaceVariable(String variable, OfflinePlayer value) {
+                    boolean isPAPI = variable.startsWith(PAPI_PREFIX);
+                    if (isPAPI) {
+                        variable = variable.substring(PAPI_PREFIX.length());
+                    }
+                    return "{" + variablePrefix + value + ";" + variable + ";" + isPAPI + "}";
+                }
+            };
+        });
+        private final Function<MaskBuilder.Input, ValueSource<UUID, ?>> valueSourceFunction;
+
+        ValueSources(Function<MaskBuilder.Input, ValueSource<UUID, ?>> valueSourceFunction) {
+            this.valueSourceFunction = valueSourceFunction;
+        }
+
+        ValueSource<UUID, ?> valueSource(MaskBuilder.Input input) {
+            return valueSourceFunction.apply(input);
+        }
+    }
+
+    private static class ButtonEntry {
+        final Object value;
         final Button button;
         final Predicate<UUID> viewPredicate;
 
-        private ButtonEntry(T value, Button button, Predicate<UUID> viewPredicate) {
+        private ButtonEntry(Object value, Button button, Predicate<UUID> viewPredicate) {
             this.value = value;
             this.button = button;
             this.viewPredicate = viewPredicate;

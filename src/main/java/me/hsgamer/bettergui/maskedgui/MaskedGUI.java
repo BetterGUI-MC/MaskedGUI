@@ -75,9 +75,9 @@ public final class MaskedGUI implements Expansion, DataFolder, Reloadable, GetLo
         MaskBuilder.INSTANCE.register(WrappedPredicateMask::new, "predicate", "requirement");
         MaskBuilder.INSTANCE.register(WrappedOneTimeAnimatedMask::new, "one-time-animated", "one-time-animate", "one-time-anim", "animated-one-time", "animate-one-time", "anim-one-time", "animated-once", "animate-once", "anim-once");
         MaskBuilder.INSTANCE.register(SwitchMask::new, "switch");
-        MaskBuilder.INSTANCE.register(input -> new ValueListMask(input, ValueListMask.ValueSources.PLAYER), "player-list", "playerlist", "players");
-        MaskBuilder.INSTANCE.register(input -> new ValueListMask(input, ValueListMask.ValueSources.SIMPLE), "simple-value-list", "value-list");
-        MaskBuilder.INSTANCE.register(input -> new ValueListMask(input, ValueListMask.ValueSources.KEY_VALUE), "key-value-list", "map-list");
+        for (ValueListMask.ValueSources valueSource : ValueListMask.ValueSources.values()) {
+            MaskBuilder.INSTANCE.register(input -> new ValueListMask(input, valueSource), valueSource.getType());
+        }
         MaskBuilder.INSTANCE.register(FilteredButtonPaginatedMask::new, "filtered-button-paginated", "filtered-button-paginate", "filtered-button-pag", "filtered-button-page", "filtered-button-p");
 
         new SpigotVersionChecker(107475).getVersion().whenComplete((output, throwable) -> {

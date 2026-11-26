@@ -138,6 +138,11 @@
         </dependency>
         <dependency>
             <groupId>io.github.projectunified</groupId>
+            <artifactId>value-venue-number</artifactId>
+            <version>${valuevenue.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.projectunified</groupId>
             <artifactId>value-venue-bukkit</artifactId>
             <version>${valuevenue.version}</version>
         </dependency>

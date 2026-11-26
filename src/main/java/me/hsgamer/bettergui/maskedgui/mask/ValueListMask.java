@@ -27,6 +27,10 @@ import io.github.projectunified.valuevenue.common.SimpleValueSource;
 import io.github.projectunified.valuevenue.core.CachedValueGenerator;
 import io.github.projectunified.valuevenue.core.ValueSource;
 import io.github.projectunified.valuevenue.core.ValueVenue;
+import io.github.projectunified.valuevenue.number.Direction;
+import io.github.projectunified.valuevenue.number.DynamicNumberValueSource;
+import io.github.projectunified.valuevenue.number.NumberType;
+import io.github.projectunified.valuevenue.number.NumberValueSource;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.builder.RequirementBuilder;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
@@ -40,9 +44,11 @@ import me.hsgamer.bettergui.util.StringReplacerApplier;
 import me.hsgamer.bettergui.util.TickUtil;
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.hscore.common.MapUtils;
+import me.hsgamer.hscore.common.Validate;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -172,7 +178,7 @@ public class ValueListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
                     .map(CollectionUtils::createStringListFromObject)
                     .orElse(Collections.emptyList());
             return new SimpleValueSource<>(valueList, s -> s);
-        }),
+        }, "simple-value-list", "value-list"),
         KEY_VALUE(input -> {
             List<Map<String, Object>> valueList = Optional.ofNullable(MapUtils.getIfFound(input.options, "values", "value"))
                     .filter(List.class::isInstance)
@@ -182,7 +188,7 @@ public class ValueListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
                     .flatMap(o -> MapUtils.castOptionalStringObjectMap(o, false).map(Stream::of).orElseGet(Stream::empty))
                     .collect(Collectors.toList());
             return new KeyValueSource<>(valueList);
-        }),
+        }, "key-value-list", "map-list"),
         PLAYER(input -> {
             String variablePrefix = input.name + "_current_";
             input.menu.getVariableManager().register(variablePrefix, original -> {
@@ -236,15 +242,112 @@ public class ValueListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
                     return "{" + variablePrefix + value + ";" + variable + ";" + isPAPI + "}";
                 }
             };
-        });
-        private final Function<MaskBuilder.Input, ValueSource<UUID, ?>> valueSourceFunction;
+        }, "player-list", "playerlist", "players"),
+        NUMBER(input -> {
+            Map<String, Object> section = input.options;
+            NumberType<? extends Number> numberType = MapUtils.getOptional(section, "number-type")
+                    .map(Objects::toString)
+                    .map(s -> {
+                        switch (s.toLowerCase(Locale.ROOT)) {
+                            case "integer":
+                            case "int":
+                                return NumberType.INT;
+                            case "long":
+                                return NumberType.LONG;
+                            case "float":
+                                return NumberType.FLOAT;
+                            case "double":
+                                return NumberType.DOUBLE;
+                            case "short":
+                                return NumberType.SHORT;
+                            default:
+                                return null;
+                        }
+                    })
+                    .orElse(NumberType.INT);
+            Direction direction = MapUtils.getOptional(section, "direction")
+                    .map(Objects::toString)
+                    .map(s -> {
+                        try {
+                            return Direction.valueOf(s.toUpperCase(Locale.ROOT));
+                        } catch (Exception e) {
+                            return null;
+                        }
+                    })
+                    .orElse(Direction.ASCENDING);
+            String start = MapUtils.getOptional(section, "start", "start-number", "first", "first-number")
+                    .map(Objects::toString)
+                    .orElse("0");
+            String end = MapUtils.getOptional(section, "end", "end-number", "last", "last-number")
+                    .map(Objects::toString)
+                    .orElse("0");
+            String step = MapUtils.getOptional(section, "step", "step-number", "number-step")
+                    .map(Objects::toString)
+                    .orElse("0");
+            boolean maxInclusive = MapUtils.getOptional(section, "max-inclusive")
+                    .map(String::valueOf)
+                    .map(Boolean::parseBoolean)
+                    .orElse(true);
+            Number defaultStart = MapUtils.getOptional(section, "default-start", "default-start-number", "default-first", "default-first-number")
+                    .map(Objects::toString)
+                    .flatMap(Validate::getNumber)
+                    .orElse(BigDecimal.ZERO);
+            Number defaultEnd = MapUtils.getOptional(section, "default-end", "default-end-number", "default-last", "default-last-number")
+                    .map(Objects::toString)
+                    .flatMap(Validate::getNumber)
+                    .orElse(BigDecimal.ZERO);
+            Number defaultStep = MapUtils.getOptional(section, "default-step", "default-step-number", "default-number-step")
+                    .map(Objects::toString)
+                    .flatMap(Validate::getNumber)
+                    .orElse(BigDecimal.ZERO);
 
-        ValueSources(Function<MaskBuilder.Input, ValueSource<UUID, ?>> valueSourceFunction) {
+            Number startNumber = null;
+            Number endNumber = null;
+            Number stepNumber = null;
+            try {
+                startNumber = Double.parseDouble(start);
+                endNumber = Double.parseDouble(end);
+                stepNumber = Double.parseDouble(step);
+            } catch (Exception e) {
+                // IGNORED
+            }
+
+            if (startNumber != null && endNumber != null && stepNumber != null) {
+                return new NumberValueSource<>(numberType, startNumber, endNumber, stepNumber, maxInclusive, direction);
+            } else {
+                //noinspection unchecked
+                return new DynamicNumberValueSource<UUID, Number>((NumberType<Number>) numberType, DynamicNumberValueSource.DEFAULT_KEY, maxInclusive, direction) {
+                    @Override
+                    protected Number getStart(UUID key) {
+                        return Validate.getNumber(start).map(Number.class::cast).orElse(defaultStart);
+                    }
+
+                    @Override
+                    protected Number getEnd(UUID key) {
+                        return Validate.getNumber(end).map(Number.class::cast).orElse(defaultEnd);
+                    }
+
+                    @Override
+                    protected Number getStep(UUID key) {
+                        return Validate.getNumber(step).map(Number.class::cast).orElse(defaultStep);
+                    }
+                };
+            }
+        }, "number-list", "number-range");
+        private final Function<MaskBuilder.Input, ValueSource<UUID, ?>> valueSourceFunction;
+        private final String[] type;
+
+        ValueSources(Function<MaskBuilder.Input, ValueSource<UUID, ?>> valueSourceFunction, String... type) {
             this.valueSourceFunction = valueSourceFunction;
+            this.type = type;
         }
 
         ValueSource<UUID, ?> valueSource(MaskBuilder.Input input) {
             return valueSourceFunction.apply(input);
+        }
+
+        public String[] getType() {
+            return type;
         }
     }
 

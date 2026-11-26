@@ -24,6 +24,7 @@ import io.github.projectunified.minelib.scheduler.common.task.Task;
 import io.github.projectunified.valuevenue.bukkit.BukkitPlayerSource;
 import io.github.projectunified.valuevenue.common.KeyValueSource;
 import io.github.projectunified.valuevenue.common.SimpleValueSource;
+import io.github.projectunified.valuevenue.common.StringSplitSource;
 import io.github.projectunified.valuevenue.core.CachedValueGenerator;
 import io.github.projectunified.valuevenue.core.ValueSource;
 import io.github.projectunified.valuevenue.core.ValueVenue;
@@ -31,6 +32,7 @@ import io.github.projectunified.valuevenue.number.Direction;
 import io.github.projectunified.valuevenue.number.DynamicNumberValueSource;
 import io.github.projectunified.valuevenue.number.NumberType;
 import io.github.projectunified.valuevenue.number.NumberValueSource;
+import me.hsgamer.bettergui.BetterGUI;
 import me.hsgamer.bettergui.builder.ButtonBuilder;
 import me.hsgamer.bettergui.builder.RequirementBuilder;
 import me.hsgamer.bettergui.maskedgui.builder.MaskBuilder;
@@ -54,6 +56,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -340,7 +344,32 @@ public class ValueListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
                     }
                 };
             }
-        }, "number-list", "number-range");
+        }, "number-list", "number-range"),
+        STRING_SPLIT(input -> {
+            Map<String, Object> section = input.options;
+            String source = MapUtils.getOptional(section, "source", "value", "values")
+                    .map(Objects::toString)
+                    .orElse(null);
+            Pattern splitRegex = MapUtils.getOptional(section, "split", "split-regex", "regex")
+                    .map(Objects::toString)
+                    .map(s -> {
+                        try {
+                            return Pattern.compile(s);
+                        } catch (Exception e) {
+                            BetterGUI.getInstance().getLogger().log(Level.WARNING, "Invalid regex for menu " + input.menu.getName() + ": " + s, e);
+                            return null;
+                        }
+                    })
+                    .orElse(StringSplitSource.DEFAULT_SPLIT_PATTERN);
+            if (source == null) {
+                return (ValueSource<UUID, Object>) (input1, value) -> null;
+            } else {
+                return new StringSplitSource<>(
+                        key -> StringReplacerApplier.replace(source, key, input.menu),
+                        splitRegex
+                );
+            }
+        }, "string-split", "string-list");
         private final Function<MaskBuilder.Input, ValueSource<UUID, ?>> valueSourceFunction;
         private final String[] type;
 

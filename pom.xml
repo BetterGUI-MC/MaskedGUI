@@ -89,6 +89,10 @@
 
                                 <!-- ProjectUnified -->
                                 <relocation>
+                                    <pattern>io.github.projectunified.minelib</pattern>
+                                    <shadedPattern>me.hsgamer.bettergui.lib.minelib</shadedPattern>
+                                </relocation>
+                                <relocation>
                                     <pattern>io.github.projectunified</pattern>
                                     <shadedPattern>me.hsgamer.bettergui.maskedgui.lib.projectunified</shadedPattern>
                                 </relocation>

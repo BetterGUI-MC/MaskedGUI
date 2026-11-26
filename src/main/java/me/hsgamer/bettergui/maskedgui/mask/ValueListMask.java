@@ -283,7 +283,7 @@ public class ValueListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
                     .orElse("0");
             String step = MapUtils.getOptional(section, "step", "step-number", "number-step")
                     .map(Objects::toString)
-                    .orElse("0");
+                    .orElse("1");
             boolean maxInclusive = MapUtils.getOptional(section, "max-inclusive")
                     .map(String::valueOf)
                     .map(Boolean::parseBoolean)
@@ -299,7 +299,8 @@ public class ValueListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
             Number defaultStep = MapUtils.getOptional(section, "default-step", "default-step-number", "default-number-step")
                     .map(Objects::toString)
                     .flatMap(Validate::getNumber)
-                    .orElse(BigDecimal.ZERO);
+                    .filter(n -> n.compareTo(BigDecimal.ZERO) > 0)
+                    .orElse(BigDecimal.ONE);
 
             Number startNumber = null;
             Number endNumber = null;
@@ -313,6 +314,9 @@ public class ValueListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
             }
 
             if (startNumber != null && endNumber != null && stepNumber != null) {
+                if (stepNumber.doubleValue() <= 0) {
+                    startNumber = 1;
+                }
                 return new NumberValueSource<>(numberType, startNumber, endNumber, stepNumber, maxInclusive, direction);
             } else {
                 //noinspection unchecked
@@ -329,7 +333,10 @@ public class ValueListMask extends WrappedPaginatedMask<ButtonPaginatedMask> {
 
                     @Override
                     protected Number getStep(UUID key) {
-                        return Validate.getNumber(step).map(Number.class::cast).orElse(defaultStep);
+                        return Validate.getNumber(step)
+                                .filter(n -> n.compareTo(BigDecimal.ZERO) > 0)
+                                .map(Number.class::cast)
+                                .orElse(defaultStep);
                     }
                 };
             }
